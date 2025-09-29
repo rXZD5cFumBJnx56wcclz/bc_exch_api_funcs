@@ -11,7 +11,7 @@ use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
 use bc_utils_lg::structs::exch::bybit::klines::RESULT_KLINE;
 use futures::future::join_all;
 use bc_utils_lg::types::maps::MAP;
-use bc_utils_lg::types::structures::SRC;
+use bc_utils_lg::types::structures::{SRC, SRC_EL};
 use bc_utils_core::mechanisms::{
     all_or_nothing, 
     one_time_hm,
@@ -56,7 +56,7 @@ pub async fn klines(
     limit: &usize,
     start: &usize,
     end: &usize,
-) -> Result<Vec<SRC<f64>>, Box<dyn std::error::Error>>
+) -> Result<SRC<f64>, Box<dyn std::error::Error>>
 {
     let inter = match interval {
         "D" => 1440,
@@ -124,14 +124,14 @@ pub async fn klines(
     )
         .await
         .into_iter()
-        .map(|v| -> Result<Vec<SRC<f64>>, Box<dyn std::error::Error>> {
+        .map(|v| -> Result<Vec<SRC_EL<f64>>, Box<dyn std::error::Error>> {
             let mut sk = v?.result.list;
             sk.reverse();
                 sk
                     .into_iter()
                     .map(
-                        |src| -> Result<SRC<f64>, Box<dyn Error>> {
-                        Ok(SRC::from_iter([
+                        |src| -> Result<SRC_EL<f64>, Box<dyn Error>> {
+                        Ok(SRC_EL::from_iter([
                             ("time".to_string(), src[0].parse()?),
                             ("open".to_string(), src[1].parse()?),
                             ("high".to_string(), src[2].parse()?),
@@ -142,9 +142,9 @@ pub async fn klines(
                         ]))
                     }
                 )
-                    .collect::<Result<Vec<SRC<f64>>, Box<dyn Error>>>()
+                    .collect::<Result<Vec<SRC_EL<f64>>, Box<dyn Error>>>()
         })
-        .collect::<Result<Vec<Vec<SRC<f64>>>, Box<dyn Error>>>()?
+        .collect::<Result<Vec<Vec<SRC_EL<f64>>>, Box<dyn Error>>>()?
         .concat())
 }
 
@@ -157,7 +157,7 @@ pub async fn klines_a(
     start: &usize,
     end: &usize,
     wait_sec: &f64,
-) -> Result<Vec<SRC<f64>>, Box<dyn Error>>
+) -> Result<Vec<SRC_EL<f64>>, Box<dyn Error>>
 {
     all_or_nothing(
         async || klines(
@@ -178,7 +178,7 @@ pub async fn kline_symbols<'a>(
     category: &str,
     symbols: &'a [String],
     interval: &str,
-) -> MAP<&'a str, Result<SRC<f64>, Box<dyn std::error::Error>>>
+) -> MAP<&'a str, Result<SRC_EL<f64>, Box<dyn std::error::Error>>>
 {
     join_all(
         symbols
@@ -215,7 +215,7 @@ pub async fn kline_symbols_a<'a>(
     symbols: &'a [String],
     interval: &str,
     wait_sec: &f64
-) -> Result<MAP<&'a str, SRC<f64>>, Box<dyn Error>>
+) -> Result<MAP<&'a str, SRC_EL<f64>>, Box<dyn Error>>
 {
     join_all(
         symbols
@@ -238,7 +238,7 @@ pub async fn kline_symbols_a<'a>(
                             {
                                 Ok(v) => Ok(v.into_iter()
                             .next()
-                            .unwrap_or(SRC::default())),
+                            .unwrap_or(SRC_EL::default())),
                                 Err(_) => Err(Box::<dyn Error>::from("klines_a err"))
                             }
                             
@@ -258,7 +258,7 @@ pub async fn kline_symbols_ao<'a>(
     symbols: &'a [String],
     interval: &'a str,
     wait_sec: &f64,
-) -> Result<MAP<&'a str, SRC<f64>>, Box<dyn Error>>
+) -> Result<MAP<&'a str, SRC_EL<f64>>, Box<dyn Error>>
 {   
     one_time_hm(
         async || kline_symbols_a(
@@ -281,7 +281,7 @@ pub async fn klines_symbols<'a>(
     limit: &usize,
     start: &usize,
     end: &usize,
-) -> MAP<&'a str, Result<Vec<SRC<f64>>, Box<dyn std::error::Error>>>
+) -> MAP<&'a str, Result<SRC<f64>, Box<dyn std::error::Error>>>
 {
     join_all(
         symbols
@@ -316,7 +316,7 @@ pub async fn klines_symbols_a<'a>(
     start: &usize,
     end: &usize,
     wait_sec: &f64,
-) -> Result<MAP<&'a str, Vec<SRC<f64>>>, Box<dyn Error>>
+) -> Result<MAP<&'a str, SRC<f64>>, Box<dyn Error>>
 {
     join_all(
         symbols

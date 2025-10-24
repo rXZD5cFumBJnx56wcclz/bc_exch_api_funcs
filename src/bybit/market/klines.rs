@@ -1,11 +1,11 @@
 #![allow(non_camel_case_types)]
 
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::error::Error;
 
 use reqwest::{
+    Client,
     Error as Error_req,
-    get,
 };
 use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
 use bc_utils_lg::structs::exch::bybit::klines::RESULT_KLINE;
@@ -18,6 +18,7 @@ use bc_utils_core::mechanisms::{
 };
 
 use crate::bybit::const_url::KLINE;
+use crate::deffunc::usizezero;
 
 
 pub async fn klines_req(
@@ -28,22 +29,28 @@ pub async fn klines_req(
     limit: &usize,
     start: &usize,
     end: &usize,
+    timeout: &Duration,
 ) -> Result<RESULT_EXCH_BYBIT<RESULT_KLINE>, Error_req>
 {
-    get(
-        format!(
-            "{api_url}{KLINE}\
-            ?category={category}\
-            &symbol={symbol}\
-            &interval={interval}\
-            &limit={limit}\
-            &start={start}\
-            &end={end}"
+    Client::builder()
+        .timeout(*timeout)
+        .build()
+        ?
+        .get(
+            format!(
+                "{api_url}{KLINE}\
+                ?category={category}\
+                &symbol={symbol}\
+                &interval={interval}\
+                &limit={limit}\
+                &start={start}\
+                &end={end}"
+            )
         )
-    )
+        .send()
         .await?
         .json::<RESULT_EXCH_BYBIT<RESULT_KLINE>>()
-    .await
+        .await
 }
 
 /// the function returns values from the beginning of the start to the end (in ascending order)
@@ -56,8 +63,10 @@ pub async fn klines(
     limit: &usize,
     start: &usize,
     end: &usize,
+    timeout_ms: &usize,
 ) -> Result<SRC<f64>, Box<dyn std::error::Error>>
 {
+    let timeout_ms = Duration::from_millis(*usizezero(timeout_ms )as u64);
     let inter = match interval {
         "D" => 1440,
         "W" => 10_080,
@@ -120,6 +129,8 @@ pub async fn klines(
                 l,
                 time1_,
                 time2_,
+                &timeout_ms,
+                
         ))
     )
         .await
@@ -156,7 +167,8 @@ pub async fn klines_a(
     limit: &usize,
     start: &usize,
     end: &usize,
-    wait_sec: &f64,
+    timeout_req_ms: &usize,
+    timeout_cycle_ms: &usize,
 ) -> Result<Vec<SRC_EL<f64>>, Box<dyn Error>>
 {
     all_or_nothing(
@@ -168,8 +180,9 @@ pub async fn klines_a(
             limit,
             start,
             end,
+            timeout_req_ms,
         ).await,
-        wait_sec,
+        timeout_cycle_ms,
     ).await
 }
 
@@ -178,6 +191,7 @@ pub async fn kline_symbols<'a>(
     category: &str,
     symbols: &'a [String],
     interval: &str,
+    timeout_ms: &usize,
 ) -> MAP<&'a str, Result<SRC_EL<f64>, Box<dyn std::error::Error>>>
 {
     join_all(
@@ -195,6 +209,7 @@ pub async fn kline_symbols<'a>(
                             &1, 
                             &0, 
                             &0,
+                            timeout_ms,
                         )
                             .await?
                             .into_iter()
@@ -214,7 +229,8 @@ pub async fn kline_symbols_a<'a>(
     category: &str,
     symbols: &'a [String],
     interval: &str,
-    wait_sec: &f64
+    timeout_req_ms: &usize,
+    timeout_cycle_ms: &usize,
 ) -> Result<MAP<&'a str, SRC_EL<f64>>, Box<dyn Error>>
 {
     join_all(
@@ -232,7 +248,8 @@ pub async fn kline_symbols_a<'a>(
                             &1, 
                             &0, 
                             &0,
-                            wait_sec,
+                            timeout_req_ms,
+                            timeout_cycle_ms,
                         )
                             .await
                             {
@@ -257,7 +274,8 @@ pub async fn kline_symbols_ao<'a>(
     category: &'a str,
     symbols: &'a [String],
     interval: &'a str,
-    wait_sec: &f64,
+    timeout_req_ms: &usize,
+    timeout_cycle_ms: &usize,
 ) -> Result<MAP<&'a str, SRC_EL<f64>>, Box<dyn Error>>
 {   
     one_time_hm(
@@ -266,7 +284,8 @@ pub async fn kline_symbols_ao<'a>(
             category, 
             symbols, 
             interval,
-            wait_sec,
+            timeout_req_ms,
+            timeout_cycle_ms,
         ).await,
         |v| Ok(v.1.get("time").ok_or(Box::<dyn Error>::from("err"))?),
         |v| Ok(v.iter().next().ok_or(Box::<dyn Error>::from("err"))?.1.get("time").ok_or(Box::<dyn Error>::from("err"))?)
@@ -281,6 +300,7 @@ pub async fn klines_symbols<'a>(
     limit: &usize,
     start: &usize,
     end: &usize,
+    timeout_req_ms: &usize,
 ) -> MAP<&'a str, Result<SRC<f64>, Box<dyn std::error::Error>>>
 {
     join_all(
@@ -296,7 +316,8 @@ pub async fn klines_symbols<'a>(
                     interval, 
                     limit, 
                     start, 
-                    end
+                    end,
+                    timeout_req_ms,
                 )
                     .await
             )
@@ -315,7 +336,8 @@ pub async fn klines_symbols_a<'a>(
     limit: &usize,
     start: &usize,
     end: &usize,
-    wait_sec: &f64,
+    timeout_req_ms: &usize,
+    timeout_cycle_ms: &usize,
 ) -> Result<MAP<&'a str, SRC<f64>>, Box<dyn Error>>
 {
     join_all(
@@ -332,7 +354,8 @@ pub async fn klines_symbols_a<'a>(
                     limit, 
                     start, 
                     end,
-                    wait_sec,
+                    timeout_req_ms,
+                    timeout_cycle_ms,
                 )
                     .await?
             ))

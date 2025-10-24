@@ -23,6 +23,6 @@ println!("{:#?}", acc_info_a(
         &sttngs.exch.key,
         &sttngs.exch.secret,
         &sttngs.exch.url,
-        &f64::INFINITY,
+        &0,
     ).await.unwrap());
 }

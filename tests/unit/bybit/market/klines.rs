@@ -1,5 +1,7 @@
 #![warn(unused_must_use)]
 
+use std::time::Duration;
+
 use bc_exch_api_funcs::bybit::market::klines::*;
 
 
@@ -13,6 +15,7 @@ async fn klines_req_lch_1() {
         &10,
         &0,
         &0,
+        &Duration::from_millis(5000u64),
     )
         .await
         .unwrap();
@@ -28,7 +31,8 @@ async fn klines_a_lch_1() {
         &10,
         &0,
         &0,
-        &f64::INFINITY,
+        &0,
+        &0,
     )
         .await
         .unwrap();
@@ -44,7 +48,8 @@ async fn klines_a_res_1() {
         &10000,
         &0,
         &0,
-        &f64::INFINITY,
+        &0,
+        &0,
     )
         .await
         .unwrap();
@@ -68,7 +73,8 @@ async fn klines_a_res_2() {
         &1100,
         &1669852800000,
         &1671062400000,
-        &f64::INFINITY,
+        &0,
+        &0,
     )
         .await
         .unwrap();
@@ -92,7 +98,8 @@ async fn klines_a_res_3() {
         &1100,
         &1669852800000,
         &1671062400000,
-        &f64::INFINITY,
+        &0,
+        &0,
     )
         .await
         .unwrap();
@@ -114,6 +121,7 @@ async fn kline_symbols_lch_1() {
         "linear",
         symbols.as_slice(),
         "1",
+        &0,
     )
         .await;
 }
@@ -130,7 +138,8 @@ async fn kline_symbols_a_lch_1() {
         "linear",
         symbols.as_slice(),
         "1",
-        &f64::INFINITY,
+        &0,
+        &0,
     )
         .await
         .unwrap();
@@ -148,7 +157,8 @@ async fn kline_symbols_ao_lch_1() {
         "linear",
         symbols.as_slice(),
         "1",
-        &f64::INFINITY,
+        &0,
+        &0,
     )
         .await
         .unwrap();
@@ -167,6 +177,7 @@ async fn klines_symbols_lch_1() {
         symbols.as_slice(),
         "1",
         &10,
+        &0,
         &0,
         &0,
     )
@@ -188,7 +199,8 @@ async fn klines_symbols_a_lch_1() {
         &10,
         &0,
         &0,
-        &f64::INFINITY,
+        &0,
+        &0,
     )
         .await
         .unwrap();

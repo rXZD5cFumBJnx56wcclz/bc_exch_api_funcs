@@ -27,6 +27,6 @@ async fn wallet_balance_a_lch_1() {
         &sttngs.exch.url,
         "UNIFIED", 
         "USDT",
-        &f64::INFINITY,
+        &0,
     ).await.unwrap());
 }

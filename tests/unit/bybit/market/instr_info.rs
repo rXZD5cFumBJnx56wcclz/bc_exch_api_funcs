@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use tokio;
 
 use bc_exch_api_funcs::bybit::market::instr_info::*;
@@ -13,6 +15,7 @@ async fn instr_info_req_lch_1(){
         "",
         &1,
         "",
+        &Duration::from_millis(5000u64),
     )
         .await
         .unwrap();
@@ -26,6 +29,7 @@ async fn instr_info_lch_1(){
         "SUIUSDT", 
         "",
         "",
+        &5000,
     )
         .await
         .unwrap();
@@ -39,6 +43,7 @@ async fn instrs_info_lch_1(){
         &["SUIUSDT".to_string(), "UNIUSDT".to_string(), "ETHUSDT".to_string()],
         "",
         "",
+        &5000,
     )
         .await
         .unwrap();
@@ -52,7 +57,8 @@ async fn instrs_info_a_lch_1(){
         &["SUIUSDT".to_string(), "UNIUSDT".to_string(), "ETHUSDT".to_string()],
         "",
         "",
-        &f64::INFINITY,
+        &5000,
+        &6000,
     )
         .await
         .unwrap();

@@ -1,6 +1,10 @@
 use std::error::Error;
+use std::time::Duration;
 
-use reqwest::{get, Error as Error_req};
+use reqwest::{
+    Client, 
+    Error as Error_req,
+};
 use bc_utils_lg::structs::exch::bybit::instr_info::{
     RESULT_INSTR_INFO,
     RESULT_INSTR_INFO1, 
@@ -10,6 +14,7 @@ use bc_utils_core::mechanisms::all_or_nothing;
 use bc_utils_lg::types::maps::MAP;
 
 use crate::bybit::const_url::INSTR_INFO;
+use crate::deffunc::usizezero;
 
 
 pub async fn instr_info_req(
@@ -19,18 +24,24 @@ pub async fn instr_info_req(
     status: &str,
     base_coin: &str,
     limit: &usize,
-    cursor: &str
+    cursor: &str,
+    timeout_ms: &Duration,
 ) -> Result<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>, Error_req>
 {
-    get(format!(
-        "{api_url}{INSTR_INFO}\
-        ?category={category}\
-        &symbol={symbol}\
-        &status={status}\
-        &baseCoin={base_coin}\
-        &limit={limit}\
-        &cursor={cursor}"
-    ))
+    Client::builder()
+        .timeout(*timeout_ms)
+        .build()
+        ?
+        .get(format!(
+            "{api_url}{INSTR_INFO}\
+            ?category={category}\
+            &symbol={symbol}\
+            &status={status}\
+            &baseCoin={base_coin}\
+            &limit={limit}\
+            &cursor={cursor}"
+        ))
+        .send()
         .await?
         .json::<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>>()
         .await
@@ -42,6 +53,7 @@ pub async fn instr_info(
     symbol: &str,
     status: &str,
     base_coin: &str,
+    timeout_ms: &usize,
 ) -> Result<RESULT_INSTR_INFO1, Box<dyn std::error::Error>>
 {
     instr_info_req(
@@ -51,7 +63,8 @@ pub async fn instr_info(
         status, 
         base_coin, 
         &1,
-        ""
+        "",
+        &Duration::from_millis(*usizezero(timeout_ms) as u64),
     ).await?.result.list.into_iter().next().ok_or(Box::from("not found"))
 }
 
@@ -61,7 +74,8 @@ pub async fn instr_info_a(
     symbol: &str,
     status: &str,
     base_coin: &str,
-    wait_sec: &f64,
+    timeout_ms: &usize,
+    timeout_cycle_ms: &usize,
 ) -> Result<RESULT_INSTR_INFO1, Box<dyn Error>>
 {
     all_or_nothing(
@@ -71,8 +85,9 @@ pub async fn instr_info_a(
             symbol, 
             status, 
             base_coin, 
+            timeout_ms,
         ).await,
-        wait_sec,
+        timeout_cycle_ms,
     ).await
 }
 
@@ -82,8 +97,10 @@ pub async fn instrs_info<'a>(
     symbols: &'a [String],
     status: &'a str,
     base_coin: &'a str,
+    timeout_ms: &usize,
 ) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn std::error::Error>> 
 {
+    let timeout_ms = Duration::from_millis(*usizezero(timeout_ms) as u64);
     let mut res = MAP::default();
     let mut passed = vec![];
     let mut cursor = "".to_string();
@@ -96,7 +113,8 @@ pub async fn instrs_info<'a>(
             base_coin, 
             // fix this `limit` arg ↓
             &1000,
-            &cursor
+            &cursor,
+            &timeout_ms,
         )
             .await?.result;
         cursor = response_.nextPageCursor.clone();
@@ -119,7 +137,8 @@ pub async fn instrs_info_a<'a>(
     symbols: &'a [String],
     status: &'a str,
     base_coin: &'a str,
-    wait_sec: &f64,
+    timeout_ms: &usize,
+    timeout_cycle_ms: &usize,
 ) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn Error>>
 {
     all_or_nothing(
@@ -128,8 +147,9 @@ pub async fn instrs_info_a<'a>(
             category, 
             symbols, 
             status, 
-            base_coin
+            base_coin,
+            timeout_ms,
         ),
-        wait_sec
+        timeout_cycle_ms,
     ).await
 }

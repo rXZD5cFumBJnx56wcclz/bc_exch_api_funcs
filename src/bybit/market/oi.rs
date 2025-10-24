@@ -1,6 +1,10 @@
 use std::error::Error;
+use std::time::Duration;
 
-use reqwest::{get, Error as Error_req};
+use reqwest::{ 
+    Error as Error_req, 
+    Client
+};
 use bc_utils_lg::structs::exch::bybit::oi::{
     RESULT_OI,
     RESULT_OI1, 
@@ -9,6 +13,7 @@ use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
 use bc_utils_core::mechanisms::all_or_nothing;
 
 use crate::bybit::const_url::OI;
+use crate::deffunc::usizezero;
 
 
 pub async fn oi_req(
@@ -20,21 +25,26 @@ pub async fn oi_req(
     end_time: &usize,
     limit: &usize,
     cursor: &str,
+    timeout_ms: &Duration,
 ) -> Result<RESULT_EXCH_BYBIT<RESULT_OI>, Error_req>
 {
     
-    get(format!("\
-        {api_url}\
-        {OI}\
-        ?category={category}\
-        &symbol={symbol}\
-        &intervalTime={interval_time}\
-        &startTime={start_time}\
-        &endTime={end_time}\
-        &limit={limit}\
-        &cursor={cursor}\
-    ")
-    )
+    Client::builder()
+        .timeout(*timeout_ms)
+        .build()
+        ?
+        .get(format!("\
+            {api_url}\
+            {OI}\
+            ?category={category}\
+            &symbol={symbol}\
+            &intervalTime={interval_time}\
+            &startTime={start_time}\
+            &endTime={end_time}\
+            &limit={limit}\
+            &cursor={cursor}\
+        "))
+        .send()
         .await?
         .json()
         .await
@@ -49,6 +59,7 @@ pub async fn oi(
     end_time: &usize,
     limit: &usize,
     cursor: &str,
+    timeout_ms: &usize
 ) -> Result<Vec<RESULT_OI1>, Box<dyn std::error::Error>>
 {
     Ok(oi_req(
@@ -59,7 +70,8 @@ pub async fn oi(
         start_time, 
         end_time, 
         limit, 
-        cursor
+        cursor,
+        &Duration::from_millis(*usizezero(timeout_ms) as u64)
     ).await?.result.list)
 }
 
@@ -72,7 +84,8 @@ pub async fn oi_a(
     end_time: &usize,
     limit: &usize,
     cursor: &str,
-    wait_sec: &f64,
+    timeout_ms: &usize,
+    timeout_cycle_ms: &usize,
 ) -> Result<Vec<RESULT_OI1>, Box<dyn Error>>
 {
     all_or_nothing(||oi(
@@ -83,7 +96,8 @@ pub async fn oi_a(
         start_time, 
         end_time, 
         limit, 
-        cursor
-    ), wait_sec).await
+        cursor,
+        timeout_ms,
+    ), timeout_cycle_ms).await
 }
 

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use tokio;
 
 use bc_exch_api_funcs::bybit::market::orderbook::*;
@@ -10,6 +12,7 @@ async fn orderbook_req_lch_1(){
         "linear", 
         "SUIUSDT",
         &10,
+        &Duration::from_millis(5000u64),
     )
         .await
         .unwrap());
@@ -22,7 +25,8 @@ async fn orderbook_a_lch_1(){
         "linear", 
         "SUIUSDT",
         &10,
-        &f64::INFINITY,
+        &0,
+        &0,
     )
         .await.unwrap();
 }
@@ -39,6 +43,7 @@ async fn orderbooks_lch_1(){
         "linear", 
         symbols,
         &10,
+        &0,
     )
         .await;
 }
@@ -55,7 +60,8 @@ async fn orderbooks_a_lch_1(){
         "linear", 
         symbols,
         &10,
-        &f64::INFINITY,
+        &0,
+        &0,
     )
         .await.unwrap();
 }

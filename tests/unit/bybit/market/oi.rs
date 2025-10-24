@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use tokio;
 
 use bc_exch_api_funcs::bybit::market::oi::*;
@@ -14,6 +16,7 @@ async fn oi_req_lch_1(){
         &0, 
         &1, 
         "",
+        &Duration::from_millis(5000u64),
     ).await);
 }
 
@@ -28,6 +31,7 @@ async fn oi_a_lch_1(){
         &0, 
         &1, 
         "",
-        &f64::INFINITY,
+        &0,
+        &0,
     ).await.unwrap());
 }

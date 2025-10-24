@@ -1,4 +1,7 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{
+    SystemTime, 
+    UNIX_EPOCH,
+};
 use std::error::Error;
 
 use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
@@ -22,7 +25,7 @@ pub async fn wallet_balance_req(
     secr: &str,
     api_url: &str,
     account_type: &str,
-    coin: &str
+    coin: &str,
 ) -> Result<RESULT_EXCH_BYBIT<RESULT_WALLET_BALANCE>, Error_req>
 {
     let time_stamp = SystemTime::now()
@@ -51,10 +54,17 @@ pub async fn wallet_balance(
     secr: &str,
     api_url: &str,
     account_type: &str,
-    coin: &str
+    coin: &str,
 ) -> Result<Vec<RESULT_WALLET_BALANCE1>, Box<dyn std::error::Error>>
 {
-    Ok(wallet_balance_req(client, token, secr, api_url, account_type, coin).await?.result.list)
+    Ok(wallet_balance_req(
+        client, 
+        token, 
+        secr, 
+        api_url, 
+        account_type, 
+        coin,
+    ).await?.result.list)
 }
 
 pub async fn wallet_balance_a(
@@ -64,8 +74,15 @@ pub async fn wallet_balance_a(
     api_url: &str,
     account_type: &str,
     coin: &str,
-    wait_sec: &f64,
+    timeout_cycle_ms: &usize,
 ) -> Result<Vec<RESULT_WALLET_BALANCE1>, Box<dyn Error>>
 {
-    all_or_nothing(|| wallet_balance(client, token, secr, api_url, account_type, coin), wait_sec).await
+    all_or_nothing(|| wallet_balance(
+        client, 
+        token, 
+        secr, 
+        api_url, 
+        account_type, 
+        coin,
+    ), timeout_cycle_ms).await
 }

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use criterion::{
     criterion_group,
     criterion_main,
@@ -10,12 +12,14 @@ use bc_exch_api_funcs::bybit::market::orderbook::*;
 
 fn orderbook_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
+    let dur = Duration::from_secs(3);
     c.bench_function("orderbook_req_lch_1", |b| {
         b.to_async(&rtm).iter(|| orderbook_req(
             "https://api.bybit.com",
             "linear", 
             "SUIUSDT",
             &10,
+        &dur,
         ));
     });
 }
@@ -28,6 +32,8 @@ fn orderbook_a_lch_1(c: &mut Criterion) {
             "linear", 
             "SUIUSDT",
             &10,
+            &3,
+            &3,
         ));
     });
 }
@@ -45,6 +51,7 @@ fn orderbooks_lch_1(c: &mut Criterion) {
             "linear", 
             symbols,
             &10,
+&3
         ));
     });
 }
@@ -62,6 +69,8 @@ fn orderbooks_a_lch_1(c: &mut Criterion) {
             "linear", 
             symbols,
             &10,
+            &3,
+            &3,
         ));
     });
 }

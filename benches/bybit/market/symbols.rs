@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use criterion::{
     criterion_group,
     criterion_main,
@@ -9,6 +11,7 @@ use bc_exch_api_funcs::bybit::market::symbols::*;
 
 fn symbols_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
+    let dur = Duration::from_secs(3);
     c.bench_function("symbols_req_lch_1", |b| {
         b.to_async(&rtm).iter(|| symbols_req(
             "https://api.bybit.com", 
@@ -16,6 +19,7 @@ fn symbols_req_lch_1(c: &mut Criterion) {
             "",
             "",
             "",
+            &dur,
         ));
     });
 }
@@ -29,6 +33,8 @@ fn symbols_a_lch_1(c: &mut Criterion) {
             "",
             "",
             "",
+            &3,
+            &3,
         ));
     });
 }

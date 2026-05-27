@@ -1,3 +1,5 @@
+use std::sync::LazyLock;
+
 use criterion::{
     criterion_group,
     criterion_main,
@@ -5,10 +7,13 @@ use criterion::{
 };
 use tokio::runtime::Runtime;
 use reqwest::Client;
-use bc_utils_lg::statics::settings::SETTINGS;
+use bc_utils_lg::funcs::settings::settings_from_json;
+use bc_utils_lg::structs::settings::SETTINGS;
 
 use bc_exch_api_funcs::bybit::account::wallet_balance::*;
 
+
+static SETTINGS: LazyLock<SETTINGS> = LazyLock::new(|| {settings_from_json("./settings.json").unwrap()});
 
 fn wallet_balance_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
@@ -16,9 +21,9 @@ fn wallet_balance_req_lch_1(c: &mut Criterion) {
     c.bench_function("wallet_balance_req_lch_1", |b| {
         b.to_async(&rtm).iter(|| wallet_balance_req(
             &cl,
-            &SETTINGS.exch.api_key,
-            &SETTINGS.exch.api_secret,
-            &SETTINGS.exch.api_url,
+            &SETTINGS.exch.key,
+            &SETTINGS.exch.secret,
+            &SETTINGS.exch.url,
             "UNIFIED",
             "USDT",
         ));
@@ -31,11 +36,12 @@ fn wallet_balance_a_lch_1(c: &mut Criterion) {
     c.bench_function("wallet_balance_a_lch_1", |b| {
         b.to_async(&rtm).iter(|| wallet_balance_a(
             &cl,
-            &SETTINGS.exch.api_key,
-            &SETTINGS.exch.api_secret,
-            &SETTINGS.exch.api_url,
+            &SETTINGS.exch.key,
+            &SETTINGS.exch.secret,
+            &SETTINGS.exch.url,
             "UNIFIED",
             "USDT",
+            &3,
         ));
     });
 }

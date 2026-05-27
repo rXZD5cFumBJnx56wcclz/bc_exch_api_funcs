@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use criterion::{
     criterion_group,
     criterion_main,
@@ -9,6 +11,7 @@ use bc_exch_api_funcs::bybit::market::klines::*;
 
 fn klines_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
+    let dur = Duration::from_secs(3);
     c.bench_function("klines_req_lch_1", |b| {
         b.to_async(&rtm).iter(|| klines_req(
             "https://api.bybit.com", 
@@ -18,6 +21,7 @@ fn klines_req_lch_1(c: &mut Criterion) {
             &10,
             &0,
             &0,
+            &dur,
         ));
     });
 }
@@ -33,6 +37,8 @@ fn klines_a_lch_1(c: &mut Criterion) {
             &10,
             &0,
             &0,
+            &3,
+            &3,
         ));
     });
 }
@@ -48,6 +54,8 @@ fn klines_a_lch_2(c: &mut Criterion) {
             &100000,
             &0,
             &0,
+            &3,
+            &3,
         ));
     });
 }
@@ -61,6 +69,7 @@ fn kline_symbols_lch_1(c: &mut Criterion) {
             "linear",
             symbols.as_slice(),
             "1",
+            &3,
         ));
     });
 }
@@ -74,6 +83,8 @@ fn kline_symbols_a_lch_1(c: &mut Criterion) {
             "linear",
             symbols.as_slice(),
             "1",
+            &3,
+            &3,
         ));
     });
 }
@@ -87,6 +98,8 @@ fn kline_symbols_ao_lch_1(c: &mut Criterion) {
             "linear",
             symbols.as_slice(),
             "1",
+            &3,
+            &3,
         ));
     });
 }
@@ -103,6 +116,7 @@ fn klines_symbols_lch_1(c: &mut Criterion) {
             &10,
             &0,
             &0,
+            &3,
         ));
     });
 }
@@ -119,6 +133,8 @@ fn klines_symbols_a_lch_1(c: &mut Criterion) {
             &10,
             &0,
             &0,
+            &3,
+            &3,
         ));
     });
 }

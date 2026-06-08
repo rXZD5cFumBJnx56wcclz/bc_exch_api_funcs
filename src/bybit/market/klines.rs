@@ -1,17 +1,26 @@
 #![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
 
 use std::error::Error;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use bc_utils_core::mechanisms::{all_or_nothing, one_time_hm};
-use bc_utils_lg::structs::exch::bybit::klines::RESULT_KLINE;
-use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
+
 use bc_utils_lg::types::maps::MAP;
 use futures::future::join_all;
 use reqwest::{Client, Error as Error_req};
+use serde::{Deserialize, Serialize};
 
 use crate::bybit::const_url::KLINE;
+use crate::bybit::result_req::RESULT_EXCH_BYBIT;
 use crate::deffunc::usizezero;
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_KLINE {
+    pub symbol: String,
+    pub category: String,
+    pub list: Vec<Vec<String>>,
+}
 
 pub async fn klines_req(
     api_url: &str,

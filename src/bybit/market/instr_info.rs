@@ -1,14 +1,79 @@
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+
 use std::error::Error;
 use std::time::Duration;
 
 use bc_utils_core::mechanisms::all_or_nothing;
-use bc_utils_lg::structs::exch::bybit::instr_info::{RESULT_INSTR_INFO, RESULT_INSTR_INFO1};
-use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
 use bc_utils_lg::types::maps::MAP;
 use reqwest::{Client, Error as Error_req};
+use serde::{Deserialize, Serialize};
 
 use crate::bybit::const_url::INSTR_INFO;
+use crate::bybit::result_req::RESULT_EXCH_BYBIT;
 use crate::deffunc::usizezero;
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_INSTR_INFO2_LEVERAGE_FILTER {
+    pub minLeverage: String,
+    pub maxLeverage: String,
+    pub leverageStep: String,
+}
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_INSTR_INFO2_PRICE_FILTER {
+    pub minPrice: String,
+    pub maxPrice: String,
+    pub tickSize: String,
+}
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_INSTR_INFO2_LOT_SIZE_FILTER {
+    pub maxOrderQty: String,
+    pub minOrderQty: String,
+    pub qtyStep: String,
+    pub postOnlyMaxOrderQty: String,
+    pub maxMktOrderQty: String,
+    pub minNotionalValue: String,
+}
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_INSTR_INFO2_RISK_PARAMETERS {
+    pub priceLimitRatioX: String,
+    pub priceLimitRatioY: String,
+}
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_INSTR_INFO1 {
+    symbol: String,
+    pub contractType: String,
+    status: String,
+    pub baseCoin: String,
+    pub quoteCoin: String,
+    pub launchTime: String,
+    pub deliveryTime: String,
+    pub deliveryFeeRate: String,
+    pub priceScale: String,
+    pub leverageFilter: RESULT_INSTR_INFO2_LEVERAGE_FILTER,
+    pub priceFilter: RESULT_INSTR_INFO2_PRICE_FILTER,
+    pub lotSizeFilter: RESULT_INSTR_INFO2_LOT_SIZE_FILTER,
+    pub unifiedMarginTrade: bool,
+    pub fundingInterval: i32,
+    settleCoin: String,
+    pub copyTrading: String,
+    pub upperFundingRate: String,
+    pub lowerFundingRate: String,
+    pub isPreListing: bool,
+    pub preListingInfo: Option<String>,
+    pub riskParameters: RESULT_INSTR_INFO2_RISK_PARAMETERS,
+}
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_INSTR_INFO {
+    pub category: String,
+    pub list: Vec<RESULT_INSTR_INFO1>,
+    pub nextPageCursor: String,
+}
 
 pub async fn instr_info_req(
     api_url: &str,

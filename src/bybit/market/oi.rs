@@ -1,13 +1,29 @@
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+
 use std::error::Error;
 use std::time::Duration;
 
 use bc_utils_core::mechanisms::all_or_nothing;
-use bc_utils_lg::structs::exch::bybit::oi::{RESULT_OI, RESULT_OI1};
-use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
 use reqwest::{Client, Error as Error_req};
+use serde::{Deserialize, Serialize};
 
 use crate::bybit::const_url::OI;
+use crate::bybit::result_req::RESULT_EXCH_BYBIT;
 use crate::deffunc::usizezero;
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_OI1 {
+    pub openInterest: String,
+    pub timestamp: String,
+}
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_OI {
+    pub symbol: String,
+    pub category: String,
+    pub list: Vec<RESULT_OI1>,
+}
 
 pub async fn oi_req(
     api_url: &str,

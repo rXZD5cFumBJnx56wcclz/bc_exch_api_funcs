@@ -1,17 +1,30 @@
 #![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
 
 use std::error::Error;
 use std::time::Duration;
 
 use bc_utils_core::mechanisms::all_or_nothing;
-use bc_utils_lg::structs::exch::bybit::orderbook::RESULT_ORDERBOOK;
-use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
+
 use bc_utils_lg::types::maps::MAP;
 use futures::future::join_all;
 use reqwest::{Client, Error as Error_req};
+use serde::{Deserialize, Serialize};
 
 use crate::bybit::const_url::ORDERBOOK;
+use crate::bybit::result_req::RESULT_EXCH_BYBIT;
 use crate::deffunc::usizezero;
+
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
+pub struct RESULT_ORDERBOOK {
+    pub s: String,
+    pub a: Vec<Vec<String>>,
+    pub b: Vec<Vec<String>>,
+    pub ts: i64,
+    pub u: i64,
+    pub seq: i64,
+    pub cts: i64,
+}
 
 pub async fn orderbook_req(
     api_url: &str,

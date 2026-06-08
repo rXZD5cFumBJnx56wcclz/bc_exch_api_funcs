@@ -1,13 +1,28 @@
+#![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
+
 use std::error::Error;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use bc_utils_core::hashing::hmac_;
 use bc_utils_core::mechanisms::all_or_nothing;
-use bc_utils_lg::structs::exch::bybit::acc_info::RESULT_ACC_INFO;
-use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
 use reqwest::{Client, Error as Error_req};
+use serde::{Deserialize, Serialize};
 
 use crate::bybit::const_url::ACC_INFO;
+use crate::bybit::result_req::RESULT_EXCH_BYBIT;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RESULT_ACC_INFO {
+    pub marginMode: String,
+    pub updatedTime: String,
+    pub unifiedMarginStatus: i32,
+    pub dcpStatus: String,
+    pub timeWindow: i32,
+    pub smpGroup: i32,
+    pub isMasterTrader: bool,
+    pub spotHedgingStatus: String,
+}
 
 pub async fn acc_info_req(
     client: &Client,

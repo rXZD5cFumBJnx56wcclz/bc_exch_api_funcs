@@ -1,21 +1,14 @@
 use std::error::Error;
 use std::time::Duration;
 
-use reqwest::{
-    Client, 
-    Error as Error_req,
-};
-use bc_utils_lg::structs::exch::bybit::instr_info::{
-    RESULT_INSTR_INFO,
-    RESULT_INSTR_INFO1, 
-};
-use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
 use bc_utils_core::mechanisms::all_or_nothing;
+use bc_utils_lg::structs::exch::bybit::instr_info::{RESULT_INSTR_INFO, RESULT_INSTR_INFO1};
+use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
 use bc_utils_lg::types::maps::MAP;
+use reqwest::{Client, Error as Error_req};
 
 use crate::bybit::const_url::INSTR_INFO;
 use crate::deffunc::usizezero;
-
 
 pub async fn instr_info_req(
     api_url: &str,
@@ -26,12 +19,10 @@ pub async fn instr_info_req(
     limit: &usize,
     cursor: &str,
     timeout_ms: &Duration,
-) -> Result<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>, Error_req>
-{
+) -> Result<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>, Error_req> {
     Client::builder()
         .timeout(*timeout_ms)
-        .build()
-        ?
+        .build()?
         .get(format!(
             "{api_url}{INSTR_INFO}\
             ?category={category}\
@@ -54,18 +45,23 @@ pub async fn instr_info(
     status: &str,
     base_coin: &str,
     timeout_ms: &usize,
-) -> Result<RESULT_INSTR_INFO1, Box<dyn std::error::Error>>
-{
+) -> Result<RESULT_INSTR_INFO1, Box<dyn std::error::Error>> {
     instr_info_req(
-        api_url, 
-        category, 
-        symbol, 
-        status, 
-        base_coin, 
+        api_url,
+        category,
+        symbol,
+        status,
+        base_coin,
         &1,
         "",
         &Duration::from_millis(*usizezero(timeout_ms) as u64),
-    ).await?.result.list.into_iter().next().ok_or(Box::from("not found"))
+    )
+    .await?
+    .result
+    .list
+    .into_iter()
+    .next()
+    .ok_or(Box::from("not found"))
 }
 
 pub async fn instr_info_a(
@@ -76,19 +72,12 @@ pub async fn instr_info_a(
     base_coin: &str,
     timeout_ms: &usize,
     timeout_cycle_ms: &usize,
-) -> Result<RESULT_INSTR_INFO1, Box<dyn Error>>
-{
+) -> Result<RESULT_INSTR_INFO1, Box<dyn Error>> {
     all_or_nothing(
-        async || instr_info(
-            api_url, 
-            category, 
-            symbol, 
-            status, 
-            base_coin, 
-            timeout_ms,
-        ).await,
+        async || instr_info(api_url, category, symbol, status, base_coin, timeout_ms).await,
         timeout_cycle_ms,
-    ).await
+    )
+    .await
 }
 
 pub async fn instrs_info<'a>(
@@ -98,27 +87,27 @@ pub async fn instrs_info<'a>(
     status: &'a str,
     base_coin: &'a str,
     timeout_ms: &usize,
-) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn std::error::Error>> 
-{
+) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn std::error::Error>> {
     let timeout_ms = Duration::from_millis(*usizezero(timeout_ms) as u64);
     let mut res = MAP::default();
     let mut passed = vec![];
     let mut cursor = "".to_string();
     while passed.len() != symbols.len() {
         let response_ = instr_info_req(
-            api_url, 
-            category, 
-            "", 
-            status, 
-            base_coin, 
+            api_url,
+            category,
+            "",
+            status,
+            base_coin,
             // fix this `limit` arg ↓
             &1000,
             &cursor,
             &timeout_ms,
         )
-            .await?.result;
+        .await?
+        .result;
         cursor = response_.nextPageCursor.clone();
-        for v in  response_.list.into_iter(){
+        for v in response_.list.into_iter() {
             for s in symbols {
                 if s == &v.symbol {
                     res.insert(s.as_str(), v);
@@ -139,17 +128,10 @@ pub async fn instrs_info_a<'a>(
     base_coin: &'a str,
     timeout_ms: &usize,
     timeout_cycle_ms: &usize,
-) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn Error>>
-{
+) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn Error>> {
     all_or_nothing(
-        || instrs_info(
-            api_url, 
-            category, 
-            symbols, 
-            status, 
-            base_coin,
-            timeout_ms,
-        ),
+        || instrs_info(api_url, category, symbols, status, base_coin, timeout_ms),
         timeout_cycle_ms,
-    ).await
+    )
+    .await
 }

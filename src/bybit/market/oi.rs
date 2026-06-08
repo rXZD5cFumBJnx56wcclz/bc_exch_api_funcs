@@ -1,20 +1,13 @@
 use std::error::Error;
 use std::time::Duration;
 
-use reqwest::{ 
-    Error as Error_req, 
-    Client
-};
-use bc_utils_lg::structs::exch::bybit::oi::{
-    RESULT_OI,
-    RESULT_OI1, 
-};
-use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
 use bc_utils_core::mechanisms::all_or_nothing;
+use bc_utils_lg::structs::exch::bybit::oi::{RESULT_OI, RESULT_OI1};
+use bc_utils_lg::structs::exch::bybit::result::RESULT_EXCH_BYBIT;
+use reqwest::{Client, Error as Error_req};
 
 use crate::bybit::const_url::OI;
 use crate::deffunc::usizezero;
-
 
 pub async fn oi_req(
     api_url: &str,
@@ -26,14 +19,12 @@ pub async fn oi_req(
     limit: &usize,
     cursor: &str,
     timeout_ms: &Duration,
-) -> Result<RESULT_EXCH_BYBIT<RESULT_OI>, Error_req>
-{
-    
+) -> Result<RESULT_EXCH_BYBIT<RESULT_OI>, Error_req> {
     Client::builder()
         .timeout(*timeout_ms)
-        .build()
-        ?
-        .get(format!("\
+        .build()?
+        .get(format!(
+            "\
             {api_url}\
             {OI}\
             ?category={category}\
@@ -43,7 +34,8 @@ pub async fn oi_req(
             &endTime={end_time}\
             &limit={limit}\
             &cursor={cursor}\
-        "))
+        "
+        ))
         .send()
         .await?
         .json()
@@ -59,20 +51,22 @@ pub async fn oi(
     end_time: &usize,
     limit: &usize,
     cursor: &str,
-    timeout_ms: &usize
-) -> Result<Vec<RESULT_OI1>, Box<dyn std::error::Error>>
-{
+    timeout_ms: &usize,
+) -> Result<Vec<RESULT_OI1>, Box<dyn std::error::Error>> {
     Ok(oi_req(
-        api_url, 
-        category, 
-        symbol, 
-        interval_time, 
-        start_time, 
-        end_time, 
-        limit, 
+        api_url,
+        category,
+        symbol,
+        interval_time,
+        start_time,
+        end_time,
+        limit,
         cursor,
-        &Duration::from_millis(*usizezero(timeout_ms) as u64)
-    ).await?.result.list)
+        &Duration::from_millis(*usizezero(timeout_ms) as u64),
+    )
+    .await?
+    .result
+    .list)
 }
 
 pub async fn oi_a(
@@ -86,18 +80,22 @@ pub async fn oi_a(
     cursor: &str,
     timeout_ms: &usize,
     timeout_cycle_ms: &usize,
-) -> Result<Vec<RESULT_OI1>, Box<dyn Error>>
-{
-    all_or_nothing(||oi(
-        api_url, 
-        category, 
-        symbol, 
-        interval_time, 
-        start_time, 
-        end_time, 
-        limit, 
-        cursor,
-        timeout_ms,
-    ), timeout_cycle_ms).await
+) -> Result<Vec<RESULT_OI1>, Box<dyn Error>> {
+    all_or_nothing(
+        || {
+            oi(
+                api_url,
+                category,
+                symbol,
+                interval_time,
+                start_time,
+                end_time,
+                limit,
+                cursor,
+                timeout_ms,
+            )
+        },
+        timeout_cycle_ms,
+    )
+    .await
 }
-

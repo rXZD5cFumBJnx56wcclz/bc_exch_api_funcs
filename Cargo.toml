@@ -4,8 +4,8 @@ version = "0.1.7"
 edition = "2024"
 
 [dependencies]
-bc_utils_core ={ git = "https://github.com/feUHMYHiEggtcIGA/bc_utils_core.git"}
-bc_utils_lg ={ git = "https://github.com/feUHMYHiEggtcIGA/bc_utils_lg.git" }
+bc_utils_core ={ path = "../bc_utils_core" }
+bc_utils_lg ={ path = "../bc_utils_lg" }
 
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11.27", features = ["json"] }

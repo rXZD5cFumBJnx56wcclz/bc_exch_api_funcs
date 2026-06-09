@@ -110,7 +110,7 @@ pub async fn wallet_balance_a(
     api_url: &str,
     account_type: &str,
     coin: &str,
-    timeout_cycle_ms: &usize,
+    timeout_cycle_ms: usize,
 ) -> Result<Vec<RESULT_WALLET_BALANCE1>, Box<dyn Error>> {
     all_or_nothing(
         || wallet_balance(client, token, secr, api_url, account_type, coin),

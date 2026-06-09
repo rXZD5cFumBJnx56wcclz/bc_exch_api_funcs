@@ -18,7 +18,7 @@ fn symbols_a_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
     c.bench_function("symbols_a_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| symbols_a("https://api.bybit.com", "linear", "", "", "", &3, &3));
+            .iter(|| symbols_a("https://api.bybit.com", "linear", "", "", "", 3, 3));
     });
 }
 

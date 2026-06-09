@@ -30,7 +30,7 @@ pub async fn orderbook_req(
     api_url: &str,
     category: &str,
     symbol: &str,
-    limit: &usize,
+    limit: usize,
     timeout_ms: &Duration,
 ) -> Result<RESULT_EXCH_BYBIT<RESULT_ORDERBOOK>, Error_req> {
     Client::builder()
@@ -53,15 +53,15 @@ pub async fn orderbook(
     api_url: &str,
     category: &str,
     symbol: &str,
-    limit: &usize,
-    timeout_ms: &usize,
+    limit: usize,
+    timeout_ms: usize,
 ) -> Result<RESULT_ORDERBOOK, Box<dyn std::error::Error>> {
     Ok(orderbook_req(
         api_url,
         category,
         symbol,
         limit,
-        &Duration::from_millis(*usizezero(timeout_ms) as u64),
+        &Duration::from_millis(usizezero(timeout_ms) as u64),
     )
     .await?
     .result)
@@ -71,9 +71,9 @@ pub async fn orderbook_a(
     api_url: &str,
     category: &str,
     symbol: &str,
-    limit: &usize,
-    timeout_ms: &usize,
-    timeout_cycle_ms: &usize,
+    limit: usize,
+    timeout_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<RESULT_ORDERBOOK, Box<dyn Error>> {
     all_or_nothing(
         async || orderbook(api_url, category, symbol, limit, timeout_ms).await,
@@ -86,8 +86,8 @@ pub async fn orderbooks<'a>(
     api_url: &str,
     category: &str,
     symbols: &'a [String],
-    limit: &usize,
-    timeout_ms: &usize,
+    limit: usize,
+    timeout_ms: usize,
 ) -> MAP<&'a str, Result<RESULT_ORDERBOOK, Box<dyn std::error::Error>>> {
     join_all(symbols.iter().map(|v| async {
         (
@@ -104,9 +104,9 @@ pub async fn orderbooks_a<'a>(
     api_url: &str,
     category: &str,
     symbols: &'a [String],
-    limit: &usize,
-    timeout_ms: &usize,
-    timeout_cycle_ms: &usize,
+    limit: usize,
+    timeout_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<MAP<&'a str, RESULT_ORDERBOOK>, Box<dyn Error>> {
     join_all(symbols.iter().map(|v| async {
         Ok((

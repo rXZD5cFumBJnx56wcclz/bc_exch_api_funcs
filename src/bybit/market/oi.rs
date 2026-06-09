@@ -30,9 +30,9 @@ pub async fn oi_req(
     category: &str,
     symbol: &str,
     interval_time: &str,
-    start_time: &usize,
-    end_time: &usize,
-    limit: &usize,
+    start_time: usize,
+    end_time: usize,
+    limit: usize,
     cursor: &str,
     timeout_ms: &Duration,
 ) -> Result<RESULT_EXCH_BYBIT<RESULT_OI>, Error_req> {
@@ -63,11 +63,11 @@ pub async fn oi(
     category: &str,
     symbol: &str,
     interval_time: &str,
-    start_time: &usize,
-    end_time: &usize,
-    limit: &usize,
+    start_time: usize,
+    end_time: usize,
+    limit: usize,
     cursor: &str,
-    timeout_ms: &usize,
+    timeout_ms: usize,
 ) -> Result<Vec<RESULT_OI1>, Box<dyn std::error::Error>> {
     Ok(oi_req(
         api_url,
@@ -78,7 +78,7 @@ pub async fn oi(
         end_time,
         limit,
         cursor,
-        &Duration::from_millis(*usizezero(timeout_ms) as u64),
+        &Duration::from_millis(usizezero(timeout_ms) as u64),
     )
     .await?
     .result
@@ -90,12 +90,12 @@ pub async fn oi_a(
     category: &str,
     symbol: &str,
     interval_time: &str,
-    start_time: &usize,
-    end_time: &usize,
-    limit: &usize,
+    start_time: usize,
+    end_time: usize,
+    limit: usize,
     cursor: &str,
-    timeout_ms: &usize,
-    timeout_cycle_ms: &usize,
+    timeout_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<Vec<RESULT_OI1>, Box<dyn Error>> {
     all_or_nothing(
         || {

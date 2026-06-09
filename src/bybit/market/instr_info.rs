@@ -81,7 +81,7 @@ pub async fn instr_info_req(
     symbol: &str,
     status: &str,
     base_coin: &str,
-    limit: &usize,
+    limit: usize,
     cursor: &str,
     timeout_ms: &Duration,
 ) -> Result<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>, Error_req> {
@@ -109,7 +109,7 @@ pub async fn instr_info(
     symbol: &str,
     status: &str,
     base_coin: &str,
-    timeout_ms: &usize,
+    timeout_ms: usize,
 ) -> Result<RESULT_INSTR_INFO1, Box<dyn std::error::Error>> {
     instr_info_req(
         api_url,
@@ -117,9 +117,9 @@ pub async fn instr_info(
         symbol,
         status,
         base_coin,
-        &1,
+        1,
         "",
-        &Duration::from_millis(*usizezero(timeout_ms) as u64),
+        &Duration::from_millis(usizezero(timeout_ms) as u64),
     )
     .await?
     .result
@@ -135,8 +135,8 @@ pub async fn instr_info_a(
     symbol: &str,
     status: &str,
     base_coin: &str,
-    timeout_ms: &usize,
-    timeout_cycle_ms: &usize,
+    timeout_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<RESULT_INSTR_INFO1, Box<dyn Error>> {
     all_or_nothing(
         async || instr_info(api_url, category, symbol, status, base_coin, timeout_ms).await,
@@ -151,9 +151,9 @@ pub async fn instrs_info<'a>(
     symbols: &'a [String],
     status: &'a str,
     base_coin: &'a str,
-    timeout_ms: &usize,
+    timeout_ms: usize,
 ) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn std::error::Error>> {
-    let timeout_ms = Duration::from_millis(*usizezero(timeout_ms) as u64);
+    let timeout_ms = Duration::from_millis(usizezero(timeout_ms) as u64);
     let mut res = MAP::default();
     let mut passed = vec![];
     let mut cursor = "".to_string();
@@ -165,7 +165,7 @@ pub async fn instrs_info<'a>(
             status,
             base_coin,
             // fix this `limit` arg ↓
-            &1000,
+            1000,
             &cursor,
             &timeout_ms,
         )
@@ -191,8 +191,8 @@ pub async fn instrs_info_a<'a>(
     symbols: &'a [String],
     status: &'a str,
     base_coin: &'a str,
-    timeout_ms: &usize,
-    timeout_cycle_ms: &usize,
+    timeout_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn Error>> {
     all_or_nothing(
         || instrs_info(api_url, category, symbols, status, base_coin, timeout_ms),

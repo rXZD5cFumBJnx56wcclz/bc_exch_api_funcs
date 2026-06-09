@@ -14,9 +14,9 @@ fn oi_req_lch_1(c: &mut Criterion) {
                 "linear",
                 "SUIUSDT",
                 "5min",
-                &0,
-                &0,
-                &1,
+                0,
+                0,
+                1,
                 "",
                 &dur,
             )
@@ -33,12 +33,12 @@ fn oi_a_lch_1(c: &mut Criterion) {
                 "linear",
                 "SUIUSDT",
                 "5min",
-                &0,
-                &0,
-                &1,
+                0,
+                0,
+                1,
                 "",
-                &3,
-                &3,
+                3,
+                3,
             )
         });
     });

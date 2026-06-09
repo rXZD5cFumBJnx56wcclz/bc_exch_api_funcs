@@ -12,7 +12,7 @@ async fn instr_info_req_lch_1() {
         "BTCUSDT",
         "",
         "",
-        &1,
+        1,
         "",
         &Duration::from_millis(5000u64),
     )
@@ -22,7 +22,7 @@ async fn instr_info_req_lch_1() {
 
 #[tokio::test]
 async fn instr_info_lch_1() {
-    instr_info("https://api.bybit.com", "linear", "SUIUSDT", "", "", &5000)
+    instr_info("https://api.bybit.com", "linear", "SUIUSDT", "", "", 5000)
         .await
         .unwrap();
 }
@@ -39,7 +39,7 @@ async fn instrs_info_lch_1() {
         ],
         "",
         "",
-        &5000,
+        5000,
     )
     .await
     .unwrap();
@@ -57,8 +57,8 @@ async fn instrs_info_a_lch_1() {
         ],
         "",
         "",
-        &5000,
-        &6000,
+        5000,
+        6000,
     )
     .await
     .unwrap();

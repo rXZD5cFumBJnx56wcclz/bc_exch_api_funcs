@@ -29,7 +29,7 @@ async fn acc_info_a_lch_1() {
             &sttngs.exch.key,
             &sttngs.exch.secret,
             &sttngs.exch.url,
-            &0,
+            0,
         )
         .await
         .unwrap()

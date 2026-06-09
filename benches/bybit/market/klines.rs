@@ -15,9 +15,9 @@ fn klines_req_lch_1(c: &mut Criterion) {
                 "linear",
                 "SUIUSDT",
                 "1",
-                &10,
-                &0,
-                &0,
+                10,
+                0,
+                0,
                 &dur,
             )
         });
@@ -33,11 +33,11 @@ fn klines_a_lch_1(c: &mut Criterion) {
                 "linear",
                 "SUIUSDT",
                 "1",
-                &10,
-                &0,
-                &0,
-                &3,
-                &3,
+                10,
+                0,
+                0,
+                3,
+                3,
             )
         });
     });
@@ -52,11 +52,11 @@ fn klines_a_lch_2(c: &mut Criterion) {
                 "linear",
                 "SUIUSDT",
                 "1",
-                &100000,
-                &0,
-                &0,
-                &3,
-                &3,
+                100000,
+                0,
+                0,
+                3,
+                3,
             )
         });
     });
@@ -76,7 +76,7 @@ fn kline_symbols_lch_1(c: &mut Criterion) {
                 "linear",
                 symbols.as_slice(),
                 "1",
-                &3,
+                3,
             )
         });
     });
@@ -96,8 +96,8 @@ fn kline_symbols_a_lch_1(c: &mut Criterion) {
                 "linear",
                 symbols.as_slice(),
                 "1",
-                &3,
-                &3,
+                3,
+                3,
             )
         });
     });
@@ -117,8 +117,8 @@ fn kline_symbols_ao_lch_1(c: &mut Criterion) {
                 "linear",
                 symbols.as_slice(),
                 "1",
-                &3,
-                &3,
+                3,
+                3,
             )
         });
     });
@@ -138,10 +138,10 @@ fn klines_symbols_lch_1(c: &mut Criterion) {
                 "linear",
                 symbols.as_slice(),
                 "1",
-                &10,
-                &0,
-                &0,
-                &3,
+                10,
+                0,
+                0,
+                3,
             )
         });
     });
@@ -161,11 +161,11 @@ fn klines_symbols_a_lch_1(c: &mut Criterion) {
                 "linear",
                 symbols.as_slice(),
                 "1",
-                &10,
-                &0,
-                &0,
-                &3,
-                &3,
+                10,
+                0,
+                0,
+                3,
+                3,
             )
         });
     });

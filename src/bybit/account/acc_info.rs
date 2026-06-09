@@ -66,7 +66,7 @@ pub async fn acc_info_a(
     token: &str,
     secr: &str,
     api_url: &str,
-    timeout_cycle_ms: &usize,
+    timeout_cycle_ms: usize,
 ) -> Result<RESULT_ACC_INFO, Box<dyn Error>> {
     all_or_nothing(|| acc_info(client, token, secr, api_url), timeout_cycle_ms).await
 }

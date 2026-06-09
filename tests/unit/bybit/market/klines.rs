@@ -11,9 +11,9 @@ async fn klines_req_lch_1() {
         "linear",
         "SUIUSDT",
         "1",
-        &10,
-        &0,
-        &0,
+        100_000,
+        0,
+        0,
         &Duration::from_millis(5000u64),
     )
     .await
@@ -27,11 +27,11 @@ async fn klines_a_lch_1() {
         "linear",
         "SUIUSDT",
         "1",
-        &10,
-        &0,
-        &0,
-        &0,
-        &0,
+        10,
+        0,
+        0,
+        0,
+        0,
     )
     .await
     .unwrap();
@@ -44,16 +44,17 @@ async fn klines_a_res_1() {
         "linear",
         "SUIUSDT",
         "1",
-        &10000,
-        &0,
-        &0,
-        &0,
-        &0,
+        99_999,
+        0,
+        0,
+        0,
+        0,
     )
     .await
     .unwrap();
-    if !res.windows(2).take(2).any(|v| v[0][0] < v[1][0]) || res.len() != 10000 {
-        panic!("{}", res.len());
+    if res[999][0] > res[1000][0] || res.len() != 99_999 {
+        dbg!(res.len(), res[999][0], res[1000][0]);
+        panic!();
     }
 }
 
@@ -64,16 +65,17 @@ async fn klines_a_res_2() {
         "linear",
         "BTCUSDT",
         "1",
-        &1100,
-        &1669852800000,
-        &1671062400000,
-        &0,
-        &0,
+        1100,
+        1669852800000,
+        1671062400000,
+        0,
+        0,
     )
     .await
     .unwrap();
-    if !res.windows(2).take(2).any(|v| v[0][0] < v[1][0]) || res.len() != 1100 {
-        panic!("{}", res.len());
+    if res[999][0] > res[1000][0] || res.len() != 1100 {
+        dbg!(res.len(), res[999][0], res[1000][0]);
+        panic!();
     }
 }
 
@@ -84,16 +86,17 @@ async fn klines_a_res_3() {
         "linear",
         "BTCUSDT",
         "1",
-        &1100,
-        &1669852800000,
-        &1671062400000,
-        &0,
-        &0,
+        1100,
+        1669852800000,
+        1671062400000,
+        0,
+        0,
     )
     .await
     .unwrap();
-    if res[0][0] < res[1000][0] {
-        panic!("{} < {}", res[0][0], res[1000][0]);
+    if res[999][0] > res[1000][0] || res.len() != 1100 {
+        dbg!(res.len(), res[999][0], res[1000][0]);
+        panic!();
     }
 }
 
@@ -109,7 +112,7 @@ async fn kline_symbols_lch_1() {
         "linear",
         symbols.as_slice(),
         "1",
-        &0,
+        0,
     )
     .await;
 }
@@ -126,8 +129,8 @@ async fn kline_symbols_a_lch_1() {
         "linear",
         symbols.as_slice(),
         "1",
-        &0,
-        &0,
+        0,
+        0,
     )
     .await
     .unwrap();
@@ -145,8 +148,8 @@ async fn kline_symbols_ao_lch_1() {
         "linear",
         symbols.as_slice(),
         "1",
-        &0,
-        &0,
+        0,
+        0,
     )
     .await
     .unwrap();
@@ -164,10 +167,10 @@ async fn klines_symbols_lch_1() {
         "linear",
         symbols.as_slice(),
         "1",
-        &10,
-        &0,
-        &0,
-        &0,
+        10,
+        0,
+        0,
+        0,
     )
     .await;
 }
@@ -184,11 +187,11 @@ async fn klines_symbols_a_lch_1() {
         "linear",
         symbols.as_slice(),
         "1",
-        &10,
-        &0,
-        &0,
-        &0,
-        &0,
+        10,
+        0,
+        0,
+        0,
+        0,
     )
     .await
     .unwrap();

@@ -12,7 +12,7 @@ async fn orderbook_req_lch_1() {
             "https://api.bybit.com",
             "linear",
             "SUIUSDT",
-            &10,
+            10,
             &Duration::from_millis(5000u64),
         )
         .await
@@ -22,7 +22,7 @@ async fn orderbook_req_lch_1() {
 
 #[tokio::test]
 async fn orderbook_a_lch_1() {
-    orderbook_a("https://api.bybit.com", "linear", "SUIUSDT", &10, &0, &0)
+    orderbook_a("https://api.bybit.com", "linear", "SUIUSDT", 10, 0, 0)
         .await
         .unwrap();
 }
@@ -34,7 +34,7 @@ async fn orderbooks_lch_1() {
         "WALRUSUSDT".to_string(),
         "ATOMUSDT".to_string(),
     ];
-    let _ = orderbooks("https://api.bybit.com", "linear", symbols, &10, &0).await;
+    let _ = orderbooks("https://api.bybit.com", "linear", symbols, 10, 0).await;
 }
 
 #[tokio::test]
@@ -44,7 +44,7 @@ async fn orderbooks_a_lch_1() {
         "ETHUSDT".to_string(),
         "ATOMUSDT".to_string(),
     ];
-    orderbooks_a("https://api.bybit.com", "linear", symbols, &10, &0, &0)
+    orderbooks_a("https://api.bybit.com", "linear", symbols, 10, 0, 0)
         .await
         .unwrap();
 }

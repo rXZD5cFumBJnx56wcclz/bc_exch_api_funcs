@@ -13,9 +13,9 @@ async fn oi_req_lch_1() {
             "linear",
             "SUIUSDT",
             "5min",
-            &0,
-            &0,
-            &1,
+            0,
+            0,
+            1,
             "",
             &Duration::from_millis(5000u64),
         )
@@ -32,12 +32,12 @@ async fn oi_a_lch_1() {
             "linear",
             "SUIUSDT",
             "5min",
-            &0,
-            &0,
-            &1,
+            0,
+            0,
+            1,
             "",
-            &0,
-            &0,
+            0,
+            0,
         )
         .await
         .unwrap()

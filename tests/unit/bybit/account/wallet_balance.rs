@@ -33,7 +33,7 @@ async fn wallet_balance_a_lch_1() {
             &sttngs.exch.url,
             "UNIFIED",
             "USDT",
-            &0,
+            0,
         )
         .await
         .unwrap()

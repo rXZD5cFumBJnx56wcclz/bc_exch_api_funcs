@@ -36,7 +36,7 @@ fn acc_info_a_lch_1(c: &mut Criterion) {
                 &SETTINGS.exch.key,
                 &SETTINGS.exch.secret,
                 &SETTINGS.exch.url,
-                &3,
+                3,
             )
         });
     });

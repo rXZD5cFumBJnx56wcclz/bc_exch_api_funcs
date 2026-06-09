@@ -18,7 +18,7 @@ async fn symbols_req_lch_1() {
 
 #[tokio::test]
 async fn symbols_a_lch_1() {
-    symbols_a("https://api.bybit.com", "linear", "", "", "", &0, &0)
+    symbols_a("https://api.bybit.com", "linear", "", "", "", 0, 0)
         .await
         .unwrap();
 }

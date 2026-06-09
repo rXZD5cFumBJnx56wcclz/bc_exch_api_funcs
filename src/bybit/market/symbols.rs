@@ -77,7 +77,7 @@ pub async fn symbols(
     symbol: &str,
     base_coin: &str,
     exp_date: &str,
-    timeout_ms: &usize,
+    timeout_ms: usize,
 ) -> Result<Vec<RESULT_SYMBOLS1>, Box<dyn std::error::Error>> {
     Ok(symbols_req(
         api_url,
@@ -85,7 +85,7 @@ pub async fn symbols(
         symbol,
         base_coin,
         exp_date,
-        &Duration::from_millis(*usizezero(timeout_ms) as u64),
+        &Duration::from_millis(usizezero(timeout_ms) as u64),
     )
     .await?
     .result
@@ -98,8 +98,8 @@ pub async fn symbols_a(
     symbol: &str,
     base_coin: &str,
     exp_date: &str,
-    timeout_ms: &usize,
-    timeout_cycle_ms: &usize,
+    timeout_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<Vec<RESULT_SYMBOLS1>, Box<dyn Error>> {
     all_or_nothing(
         async || symbols(api_url, category, symbol, base_coin, exp_date, timeout_ms).await,

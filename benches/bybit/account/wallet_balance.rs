@@ -40,7 +40,7 @@ fn wallet_balance_a_lch_1(c: &mut Criterion) {
                 &SETTINGS.exch.url,
                 "UNIFIED",
                 "USDT",
-                &3,
+                3,
             )
         });
     });

@@ -1,6 +1,6 @@
-pub fn usizezero(a: &usize) -> &usize {
+pub fn usizezero(a: usize) -> usize {
     match a {
-        &0 => &usize::MAX,
+        0 => usize::MAX,
         _ => a,
     }
 }

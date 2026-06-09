@@ -27,9 +27,9 @@ pub async fn klines_req(
     category: &str,
     symbol: &str,
     interval: &str,
-    limit: &usize,
-    start: &usize,
-    end: &usize,
+    limit: usize,
+    start: usize,
+    end: usize,
     timeout: &Duration,
 ) -> Result<RESULT_EXCH_BYBIT<RESULT_KLINE>, Error_req> {
     Client::builder()
@@ -57,100 +57,64 @@ pub async fn klines(
     category: &str,
     symbol: &str,
     interval: &str,
-    limit: &usize,
-    start: &usize,
-    end: &usize,
-    timeout_ms: &usize,
+    limit: usize,
+    start: usize,
+    end: usize,
+    timeout_ms: usize,
 ) -> Result<Vec<Vec<f64>>, Box<dyn std::error::Error>> {
-    let timeout_ms = Duration::from_millis(*usizezero(timeout_ms) as u64);
     let inter = match interval {
         "D" => 1440,
         "W" => 10_080,
         "M" => 43_200,
         v => v.parse::<usize>().unwrap(),
     };
+    let timeout_ms = Duration::from_millis(usizezero(timeout_ms) as u64);
     let time_stamp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_millis() as usize;
     let changes = inter * limit * 60 * 1000;
     let step = inter * 1000 * 60 * 1000;
-    let mut limits_num = *limit;
-    let mut limits = vec![];
-    let mut time1 = vec![];
-    let mut time2 = vec![];
-    let diff_st_end = end - start;
-    for time_ in ({
-        if diff_st_end != changes && start == &0 && end == &0 {
-            time_stamp - changes
-        } else if diff_st_end != changes && start == &0 && end != &0 {
-            *end - changes
-        } else {
-            *start
-        }
-    }..{
-        if diff_st_end != changes && start == &0 && end == &0 {
-            time_stamp
-        } else if diff_st_end != changes && start != &0 && end == &0 {
-            start + changes
-        } else {
-            *end
-        }
-    })
-        .rev()
-        .step_by(step)
-    {
-        let sk = match limits_num % 1000 {
-            0 => 1000,
-            v => v,
-        };
-        limits_num -= sk;
-        limits.push(sk);
-        time1.push(time_ - step * 2);
-        time2.push(time_ - step);
-        if limits_num == 0 {
-            break;
-        }
+    let mut klines = Vec::with_capacity(limit);
+    let (start, end) = if start != 0 && end == 0 {
+        (start, start + changes)
+    } else if start == 0 && end != 0 {
+        (end - changes, end)
+    } else {
+        (time_stamp - changes, time_stamp)
+    };
+    let mut futures = Vec::with_capacity(limit);
+    for s in (start..end).step_by(step) {
+        futures.push(async move {
+            let mut res = klines_req(
+                api_url,
+                category,
+                symbol,
+                interval,
+                limit,
+                s,
+                s + step,
+                &timeout_ms,
+            )
+            .await?
+            .result
+            .list;
+            res.reverse();
+            Ok::<Vec<Vec<f64>>, Box<dyn Error>>(
+                res.into_iter()
+                    .map(|v| {
+                        v.into_iter()
+                            .map(|v1| v1.parse::<f64>().expect("this not a number"))
+                            .collect()
+                    })
+                    .collect::<Vec<Vec<f64>>>(),
+            )
+        });
     }
-    Ok(join_all(
-        time1
-            .iter()
-            .zip(time2.iter())
-            .zip(limits.iter())
-            .map(|((time1_, time2_), l)| {
-                klines_req(
-                    api_url,
-                    category,
-                    symbol,
-                    interval,
-                    l,
-                    time1_,
-                    time2_,
-                    &timeout_ms,
-                )
-            }),
-    )
-    .await
-    .into_iter()
-    .map(|v| -> Result<Vec<Vec<f64>>, Box<dyn std::error::Error>> {
-        let mut sk = v?.result.list;
-        sk.reverse();
-        sk.into_iter()
-            .map(|src| -> Result<Vec<f64>, Box<dyn Error>> {
-                Ok(vec![
-                    src[0].parse()?,
-                    src[1].parse()?,
-                    src[2].parse()?,
-                    src[3].parse()?,
-                    src[4].parse()?,
-                    src[5].parse()?,
-                    src[6].parse()?,
-                ])
-            })
-            .collect::<Result<Vec<Vec<f64>>, Box<dyn Error>>>()
-    })
-    .collect::<Result<Vec<Vec<Vec<f64>>>, Box<dyn Error>>>()?
-    .concat())
+    for v in join_all(futures).await {
+        klines.extend_from_slice(&v?);
+    }
+    Ok(klines)
 }
 
 pub async fn klines_a(
@@ -158,11 +122,11 @@ pub async fn klines_a(
     category: &str,
     symbol: &str,
     interval: &str,
-    limit: &usize,
-    start: &usize,
-    end: &usize,
-    timeout_req_ms: &usize,
-    timeout_cycle_ms: &usize,
+    limit: usize,
+    start: usize,
+    end: usize,
+    timeout_req_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
     all_or_nothing(
         async || {
@@ -188,13 +152,13 @@ pub async fn kline_symbols<'a>(
     category: &str,
     symbols: &'a [String],
     interval: &str,
-    timeout_ms: &usize,
+    timeout_ms: usize,
 ) -> MAP<&'a str, Result<Vec<f64>, Box<dyn std::error::Error>>> {
     join_all(symbols.iter().map(|s| async {
         (
             s.as_str(),
             async {
-                klines(api_url, category, s, interval, &1, &0, &0, timeout_ms)
+                klines(api_url, category, s, interval, 1, 0, 0, timeout_ms)
                     .await?
                     .into_iter()
                     .next()
@@ -213,8 +177,8 @@ pub async fn kline_symbols_a<'a>(
     category: &str,
     symbols: &'a [String],
     interval: &str,
-    timeout_req_ms: &usize,
-    timeout_cycle_ms: &usize,
+    timeout_req_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<MAP<&'a str, Vec<f64>>, Box<dyn Error>> {
     join_all(symbols.iter().map(|s| async {
         Ok((
@@ -225,9 +189,9 @@ pub async fn kline_symbols_a<'a>(
                     category,
                     s,
                     interval,
-                    &1,
-                    &0,
-                    &0,
+                    1,
+                    0,
+                    0,
                     timeout_req_ms,
                     timeout_cycle_ms,
                 )
@@ -250,8 +214,8 @@ pub async fn kline_symbols_ao<'a>(
     category: &'a str,
     symbols: &'a [String],
     interval: &'a str,
-    timeout_req_ms: &usize,
-    timeout_cycle_ms: &usize,
+    timeout_req_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<MAP<&'a str, Vec<f64>>, Box<dyn Error>> {
     one_time_hm(
         async || {
@@ -283,10 +247,10 @@ pub async fn klines_symbols<'a>(
     category: &str,
     symbols: &'a [String],
     interval: &str,
-    limit: &usize,
-    start: &usize,
-    end: &usize,
-    timeout_req_ms: &usize,
+    limit: usize,
+    start: usize,
+    end: usize,
+    timeout_req_ms: usize,
 ) -> MAP<&'a str, Result<Vec<Vec<f64>>, Box<dyn std::error::Error>>> {
     join_all(symbols.iter().map(|s| async {
         (
@@ -314,11 +278,11 @@ pub async fn klines_symbols_a<'a>(
     category: &str,
     symbols: &'a [String],
     interval: &str,
-    limit: &usize,
-    start: &usize,
-    end: &usize,
-    timeout_req_ms: &usize,
-    timeout_cycle_ms: &usize,
+    limit: usize,
+    start: usize,
+    end: usize,
+    timeout_req_ms: usize,
+    timeout_cycle_ms: usize,
 ) -> Result<MAP<&'a str, Vec<Vec<f64>>>, Box<dyn Error>> {
     join_all(symbols.iter().map(|s| async {
         Ok((

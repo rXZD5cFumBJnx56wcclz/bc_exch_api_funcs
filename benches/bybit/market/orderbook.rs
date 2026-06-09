@@ -10,7 +10,7 @@ fn orderbook_req_lch_1(c: &mut Criterion) {
     let dur = Duration::from_secs(3);
     c.bench_function("orderbook_req_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| orderbook_req("https://api.bybit.com", "linear", "SUIUSDT", &10, &dur));
+            .iter(|| orderbook_req("https://api.bybit.com", "linear", "SUIUSDT", 10, &dur));
     });
 }
 
@@ -18,7 +18,7 @@ fn orderbook_a_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
     c.bench_function("orderbook_a_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| orderbook_a("https://api.bybit.com", "linear", "SUIUSDT", &10, &3, &3));
+            .iter(|| orderbook_a("https://api.bybit.com", "linear", "SUIUSDT", 10, 3, 3));
     });
 }
 
@@ -31,7 +31,7 @@ fn orderbooks_lch_1(c: &mut Criterion) {
     ];
     c.bench_function("orderbooks_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| orderbooks("https://api.bybit.com", "linear", symbols, &10, &3));
+            .iter(|| orderbooks("https://api.bybit.com", "linear", symbols, 10, 3));
     });
 }
 
@@ -44,7 +44,7 @@ fn orderbooks_a_lch_1(c: &mut Criterion) {
     ];
     c.bench_function("orderbooks_a_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| orderbooks_a("https://api.bybit.com", "linear", symbols, &10, &3, &3));
+            .iter(|| orderbooks_a("https://api.bybit.com", "linear", symbols, 10, 3, 3));
     });
 }
 

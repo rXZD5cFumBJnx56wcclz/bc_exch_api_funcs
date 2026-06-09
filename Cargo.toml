@@ -10,7 +10,7 @@ bc_utils_lg ={ path = "../bc_utils_lg" }
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11.27", features = ["json"] }
 serde ={ version = "1.0", features = ["derive"]}
-serde_json = "1.0"
+serde_json5 = "0.1"
 futures = "0.3"
 chrono = "0.4"
 

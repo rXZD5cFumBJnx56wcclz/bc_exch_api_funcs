@@ -1,4 +1,4 @@
-use bc_utils_lg::funcs::settings::settings_from_json;
+use bc_constructor::settings::settings_from_json;
 use reqwest::Client;
 
 use bc_exch_api_funcs::bybit::account::acc_info::*;

@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
-use bc_utils_lg::funcs::settings::settings_from_json;
-use bc_utils_lg::structs::settings::SETTINGS;
+use bc_constructor::settings::settings_from_json;
+use bc_constructor::settings::SETTINGS;
 use criterion::{Criterion, criterion_group, criterion_main};
 use reqwest::Client;
 use tokio::runtime::Runtime;

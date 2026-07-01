@@ -1,18 +1,8 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use std::error::Error;
-use std::time::Duration;
-
-use bc_utils_core::mechanisms::all_or_nothing;
-use bc_utils_lg::types::maps::MAP;
-use reqwest::{Client, Error as Error_req};
-use serde::{Deserialize, Serialize};
-
 use crate::bybit::const_url::INSTR_INFO;
-use crate::bybit::exch_struct::{BYBIT, Exchange};
-use crate::bybit::result_req::RESULT_EXCH_BYBIT;
-use crate::deffunc::usizezero;
+use crate::bybit::prelude::*;
 
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
 pub struct RESULT_INSTR_INFO2_LEVERAGE_FILTER {
@@ -177,11 +167,7 @@ impl<'a> InstrumentsInfo<'a> for BYBIT<'a> {
         cursor: &str,
     ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>, Error_req>> {
         async move {
-            Client::builder()
-                .timeout(Duration::from_millis(
-                    usizezero(self.s().exch.timeout_req_ms) as u64,
-                ))
-                .build()?
+            self.client
                 .get(format!(
                     "{}{INSTR_INFO}\
                 ?category={}\

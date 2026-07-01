@@ -1,16 +1,8 @@
 #![warn(unused_must_use)]
 
-use std::sync::LazyLock;
-
-use bc_utils_lg::settings::SETTINGS;
-use bc_utils_lg::settings::settings_from_json;
-
-use bc_exch_api_funcs::bybit::exch_struct::BYBIT;
 use bc_exch_api_funcs::bybit::market::klines::*;
 
-static S: LazyLock<SETTINGS> =
-    LazyLock::new(|| settings_from_json("settings.json".into()).unwrap());
-static EXCH: LazyLock<BYBIT<'_>> = LazyLock::new(|| BYBIT::new(&*S));
+use crate::unit::bybit::prelude::*;
 
 #[tokio::test]
 async fn klines_req_lch_1() {
@@ -106,3 +98,4 @@ async fn klines_symbols_a_lch_1() {
         .await
         .unwrap();
 }
+

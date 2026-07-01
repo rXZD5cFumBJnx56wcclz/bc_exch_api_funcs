@@ -1,18 +1,8 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 
-use std::error::Error;
-use std::time::{SystemTime, UNIX_EPOCH};
-
-use bc_utils_core::hashing::hmac_;
-use bc_utils_core::mechanisms::all_or_nothing;
-use reqwest::{Client, Error as Error_req};
-
 use crate::bybit::const_url::WALLET_BALANCE;
-use crate::bybit::exch_struct::{BYBIT, Exchange};
-use crate::bybit::result_req::RESULT_EXCH_BYBIT;
-
-use serde::{Deserialize, Serialize};
+use crate::bybit::prelude::*;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct RESULT_WALLET_BALANCE2 {
@@ -60,48 +50,31 @@ pub struct RESULT_WALLET_BALANCE {
 pub trait WalletBalance<'a>: Exchange<'a> {
     fn wallet_balance_req(
         &'a self,
-        client: &Client,
-        // fix
-        account_type: &str,
+
         coin: &str,
     ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_WALLET_BALANCE>, Error_req>>;
     fn wallet_balance(
         &'a self,
-        client: &Client,
-        account_type: &str,
+
         coin: &str,
     ) -> impl Future<Output = Result<Vec<RESULT_WALLET_BALANCE1>, Box<dyn std::error::Error>>> {
-        async move {
-            Ok(self
-                .wallet_balance_req(client, account_type, coin)
-                .await?
-                .result
-                .list)
-        }
+        async move { Ok(self.wallet_balance_req(coin).await?.result.list) }
     }
 
     fn wallet_balance_a(
         &'a self,
-        client: &Client,
-        account_type: &str,
+
         coin: &str,
         timeout_cycle_ms: usize,
     ) -> impl Future<Output = Result<Vec<RESULT_WALLET_BALANCE1>, Box<dyn Error>>> {
-        async move {
-            all_or_nothing(
-                || self.wallet_balance(client, account_type, coin),
-                timeout_cycle_ms,
-            )
-            .await
-        }
+        async move { all_or_nothing(|| self.wallet_balance(coin), timeout_cycle_ms).await }
     }
 }
 
 impl<'a> WalletBalance<'a> for BYBIT<'a> {
     fn wallet_balance_req(
         &'a self,
-        client: &Client,
-        account_type: &str,
+
         coin: &str,
     ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_WALLET_BALANCE>, Error_req>> {
         async move {
@@ -109,8 +82,8 @@ impl<'a> WalletBalance<'a> for BYBIT<'a> {
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
                 .as_millis();
-            let query = format!("accountType={account_type}&coin={coin}");
-            client
+            let query = format!("accountType={}&coin={coin}", &self.s.trade.account_type);
+            self.client
                 .get(format!("{}{}?{}", &self.s.exch.url, WALLET_BALANCE, query))
                 .header(
                     "X-BAPI-SIGN",

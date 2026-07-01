@@ -1,16 +1,8 @@
-use std::sync::LazyLock;
+#[path = "../prelude.rs"]
+mod prelude;
 
-use bc_utils_lg::settings::SETTINGS;
-use bc_utils_lg::settings::settings_from_json;
-use criterion::{Criterion, criterion_group, criterion_main};
-use tokio::runtime::Runtime;
-
-use bc_exch_api_funcs::bybit::exch_struct::BYBIT;
 use bc_exch_api_funcs::bybit::market::orderbook::*;
-
-static S: LazyLock<SETTINGS> =
-    LazyLock::new(|| settings_from_json("settings.json".into()).unwrap());
-static EXCH: LazyLock<BYBIT<'_>> = LazyLock::new(|| BYBIT::new(&*S));
+use prelude::*;
 
 fn orderbook_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();

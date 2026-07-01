@@ -1,13 +1,27 @@
+use std::time::Duration;
+
 use bc_utils_lg::settings::SETTINGS;
+use reqwest::Client;
+
+use crate::deffunc::usizezero;
 
 #[derive(Debug, Clone)]
 pub struct BYBIT<'a> {
+    pub client: Client,
     pub s: &'a SETTINGS,
 }
 
 impl<'a> BYBIT<'a> {
     pub fn new(s: &'a SETTINGS) -> Self {
-        Self { s }
+        Self {
+            client: Client::builder()
+                .timeout(Duration::from_millis(
+                    usizezero(s.exch.timeout_cycle_ms) as u64
+                ))
+                .build()
+                .unwrap(),
+            s,
+        }
     }
 }
 

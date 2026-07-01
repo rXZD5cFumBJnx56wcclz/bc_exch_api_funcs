@@ -43,6 +43,11 @@ path = "benches/bybit/market/oi.rs"
 harness = false
 
 [[bench]]
+name = "src_bybit"
+path = "benches/bybit/market/src.rs"
+harness = false
+
+[[bench]]
 name = "acc_info_bybit"
 path = "benches/bybit/account/acc_info.rs"
 harness = false

@@ -1,15 +1,6 @@
-use std::sync::LazyLock;
-
-use bc_utils_lg::settings::SETTINGS;
-use bc_utils_lg::settings::settings_from_json;
-use tokio;
-
-use bc_exch_api_funcs::bybit::exch_struct::BYBIT;
 use bc_exch_api_funcs::bybit::market::orderbook::*;
 
-static S: LazyLock<SETTINGS> =
-    LazyLock::new(|| settings_from_json("settings.json".into()).unwrap());
-static EXCH: LazyLock<BYBIT<'_>> = LazyLock::new(|| BYBIT::new(&*S));
+use crate::unit::bybit::prelude::*;
 
 #[tokio::test]
 async fn orderbook_req_lch_1() {

@@ -1,24 +1,28 @@
-use std::time::Duration;
+use std::sync::LazyLock;
 
+use bc_utils_lg::settings::SETTINGS;
+use bc_utils_lg::settings::settings_from_json;
 use criterion::{Criterion, criterion_group, criterion_main};
 use tokio::runtime::Runtime;
 
+use bc_exch_api_funcs::bybit::exch_struct::BYBIT;
 use bc_exch_api_funcs::bybit::market::symbols::*;
+
+static S: LazyLock<SETTINGS> =
+    LazyLock::new(|| settings_from_json("settings.json".into()).unwrap());
+static EXCH: LazyLock<BYBIT<'_>> = LazyLock::new(|| BYBIT::new(&*S));
 
 fn symbols_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
-    let dur = Duration::from_secs(3);
     c.bench_function("symbols_req_lch_1", |b| {
-        b.to_async(&rtm)
-            .iter(|| symbols_req("https://api.bybit.com", "linear", "", "", "", &dur));
+        b.to_async(&rtm).iter(|| EXCH.symbols_req("", "", ""));
     });
 }
 
 fn symbols_a_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
     c.bench_function("symbols_a_lch_1", |b| {
-        b.to_async(&rtm)
-            .iter(|| symbols_a("https://api.bybit.com", "linear", "", "", "", 3, 3));
+        b.to_async(&rtm).iter(|| EXCH.symbols_a("", "", ""));
     });
 }
 

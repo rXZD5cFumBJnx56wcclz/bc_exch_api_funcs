@@ -1,58 +1,40 @@
-use std::time::Duration;
+use std::sync::LazyLock;
 
+use bc_utils_lg::settings::SETTINGS;
+use bc_utils_lg::settings::settings_from_json;
 use criterion::{Criterion, criterion_group, criterion_main};
 use tokio::runtime::Runtime;
 
+use bc_exch_api_funcs::bybit::exch_struct::BYBIT;
 use bc_exch_api_funcs::bybit::market::instr_info::*;
 
+static S: LazyLock<SETTINGS> =
+    LazyLock::new(|| settings_from_json("settings.json".into()).unwrap());
+static EXCH: LazyLock<BYBIT<'_>> = LazyLock::new(|| BYBIT::new(&*S));
+
 fn instr_info_req_lch_1(c: &mut Criterion) {
-    let dur = Duration::from_secs(3);
     let rtm = Runtime::new().unwrap();
     c.bench_function("instr_info_req_lch_1", |b| {
-        b.to_async(&rtm).iter(|| {
-            instr_info_req(
-                "https://api.bybit.com",
-                "linear",
-                "BTCUSDT",
-                "",
-                "",
-                1,
-                "",
-                &dur,
-            )
-        });
+        b.to_async(&rtm)
+            .iter(|| EXCH.instr_info_req("", "", "", 1, ""));
     });
 }
 
 fn instr_info_lch_1(c: &mut Criterion) {
-    let dur = 3;
     let rtm = Runtime::new().unwrap();
     c.bench_function("instr_info_lch_1", |b| {
-        b.to_async(&rtm)
-            .iter(|| instr_info("https://api.bybit.com", "linear", "BTCUSDT", "", "", dur));
+        b.to_async(&rtm).iter(|| EXCH.instr_info("BTCUSDT", "", ""));
     });
 }
 
 fn instr_info_a_lch_1(c: &mut Criterion) {
-    let dur = 3;
     let rtm = Runtime::new().unwrap();
     c.bench_function("instr_info_a_lch_1", |b| {
-        b.to_async(&rtm).iter(|| {
-            instr_info_a(
-                "https://api.bybit.com",
-                "linear",
-                "BTCUSDT",
-                "",
-                "",
-                dur,
-                dur,
-            )
-        });
+        b.to_async(&rtm).iter(|| EXCH.instr_info_a("", "", ""));
     });
 }
 
 fn instrs_info_lch_1(c: &mut Criterion) {
-    let dur = 3;
     let rtm = Runtime::new().unwrap();
     let symbols = &[
         "SUIUSDT".to_string(),
@@ -60,13 +42,11 @@ fn instrs_info_lch_1(c: &mut Criterion) {
         "ETHUSDT".to_string(),
     ];
     c.bench_function("instrs_info_lch_1", |b| {
-        b.to_async(&rtm)
-            .iter(|| instrs_info("https://api.bybit.com", "linear", symbols, "", "", dur));
+        b.to_async(&rtm).iter(|| EXCH.instrs_info(symbols, "", ""));
     });
 }
 
 fn instrs_info_a_lch_1(c: &mut Criterion) {
-    let dur = 3;
     let rtm = Runtime::new().unwrap();
     let symbols = &[
         "SUIUSDT".to_string(),
@@ -75,7 +55,7 @@ fn instrs_info_a_lch_1(c: &mut Criterion) {
     ];
     c.bench_function("instrs_info_a_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| instrs_info_a("https://api.bybit.com", "linear", symbols, "", "", dur, dur));
+            .iter(|| EXCH.instrs_info_a(symbols, "", ""));
     });
 }
 

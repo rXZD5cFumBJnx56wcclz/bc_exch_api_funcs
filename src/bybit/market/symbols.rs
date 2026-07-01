@@ -4,7 +4,10 @@
 use std::error::Error;
 use std::time::Duration;
 
-use crate::bybit::result_req::RESULT_EXCH_BYBIT;
+use crate::bybit::{
+    exch_struct::{BYBIT, Exchange},
+    result_req::RESULT_EXCH_BYBIT,
+};
 use bc_utils_core::mechanisms::all_or_nothing;
 use reqwest::{Client, Error as Error_req};
 
@@ -47,63 +50,69 @@ pub struct RESULT_SYMBOLS {
     pub list: Vec<RESULT_SYMBOLS1>,
 }
 
-pub async fn symbols_req(
-    api_url: &str,
-    category: &str,
-    symbol: &str,
-    base_coin: &str,
-    exp_date: &str,
-    timeout_ms: &Duration,
-) -> Result<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>, Error_req> {
-    Client::builder()
-        .timeout(*timeout_ms)
-        .build()?
-        .get(format!(
-            "{api_url}{TICKERS}\
-                ?category={category}\
-                &symbol={symbol}\
-                &baseCoin={base_coin}\
-                &expDate={exp_date}"
-        ))
-        .send()
-        .await?
-        .json::<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>>()
-        .await
+pub trait Symbols<'a>: Exchange<'a> {
+    fn symbols_req(
+        &'a self,
+        symbol: &str,
+        base_coin: &str,
+        exp_date: &str,
+    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>, Error_req>>;
+    fn symbols(
+        &'a self,
+        symbol: &str,
+        base_coin: &str,
+        exp_date: &str,
+    ) -> impl Future<Output = Result<Vec<RESULT_SYMBOLS1>, Box<dyn std::error::Error>>> {
+        async move {
+            Ok(self
+                .symbols_req(symbol, base_coin, exp_date)
+                .await?
+                .result
+                .list)
+        }
+    }
+
+    fn symbols_a(
+        &'a self,
+        symbol: &str,
+        base_coin: &str,
+        exp_date: &str,
+    ) -> impl Future<Output = Result<Vec<RESULT_SYMBOLS1>, Box<dyn Error>>> {
+        async move {
+            all_or_nothing(
+                async || self.symbols(symbol, base_coin, exp_date).await,
+                usizezero(self.s().exch.timeout_cycle_ms),
+            )
+            .await
+        }
+    }
 }
 
-pub async fn symbols(
-    api_url: &str,
-    category: &str,
-    symbol: &str,
-    base_coin: &str,
-    exp_date: &str,
-    timeout_ms: usize,
-) -> Result<Vec<RESULT_SYMBOLS1>, Box<dyn std::error::Error>> {
-    Ok(symbols_req(
-        api_url,
-        category,
-        symbol,
-        base_coin,
-        exp_date,
-        &Duration::from_millis(usizezero(timeout_ms) as u64),
-    )
-    .await?
-    .result
-    .list)
-}
-
-pub async fn symbols_a(
-    api_url: &str,
-    category: &str,
-    symbol: &str,
-    base_coin: &str,
-    exp_date: &str,
-    timeout_ms: usize,
-    timeout_cycle_ms: usize,
-) -> Result<Vec<RESULT_SYMBOLS1>, Box<dyn Error>> {
-    all_or_nothing(
-        async || symbols(api_url, category, symbol, base_coin, exp_date, timeout_ms).await,
-        timeout_cycle_ms,
-    )
-    .await
+impl<'a> Symbols<'a> for BYBIT<'a> {
+    fn symbols_req(
+        &'a self,
+        symbol: &str,
+        base_coin: &str,
+        exp_date: &str,
+    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>, Error_req>> {
+        async move {
+            Client::builder()
+                .timeout(Duration::from_millis(
+                    usizezero(self.s.exch.timeout_req_ms) as u64
+                ))
+                .build()?
+                .get(format!(
+                    "{}{TICKERS}\
+                        ?category={}\
+                        &symbol={symbol}\
+                        &baseCoin={base_coin}\
+                        &expDate={exp_date}",
+                    &self.s.exch.url, &self.s.trade.category,
+                ))
+                .send()
+                .await?
+                .json::<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>>()
+                .await
+        }
+    }
 }

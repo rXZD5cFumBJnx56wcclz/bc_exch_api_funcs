@@ -10,6 +10,7 @@ use reqwest::{Client, Error as Error_req};
 use serde::{Deserialize, Serialize};
 
 use crate::bybit::const_url::INSTR_INFO;
+use crate::bybit::exch_struct::{BYBIT, Exchange};
 use crate::bybit::result_req::RESULT_EXCH_BYBIT;
 use crate::deffunc::usizezero;
 
@@ -45,9 +46,9 @@ pub struct RESULT_INSTR_INFO2_RISK_PARAMETERS {
 
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
 pub struct RESULT_INSTR_INFO1 {
-    symbol: String,
+    pub symbol: String,
     pub contractType: String,
-    status: String,
+    pub status: String,
     pub baseCoin: String,
     pub quoteCoin: String,
     pub launchTime: String,
@@ -59,7 +60,7 @@ pub struct RESULT_INSTR_INFO1 {
     pub lotSizeFilter: RESULT_INSTR_INFO2_LOT_SIZE_FILTER,
     pub unifiedMarginTrade: bool,
     pub fundingInterval: i32,
-    settleCoin: String,
+    pub settleCoin: String,
     pub copyTrading: String,
     pub upperFundingRate: String,
     pub lowerFundingRate: String,
@@ -75,128 +76,127 @@ pub struct RESULT_INSTR_INFO {
     pub nextPageCursor: String,
 }
 
-pub async fn instr_info_req(
-    api_url: &str,
-    category: &str,
-    symbol: &str,
-    status: &str,
-    base_coin: &str,
-    limit: usize,
-    cursor: &str,
-    timeout_ms: &Duration,
-) -> Result<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>, Error_req> {
-    Client::builder()
-        .timeout(*timeout_ms)
-        .build()?
-        .get(format!(
-            "{api_url}{INSTR_INFO}\
-            ?category={category}\
-            &symbol={symbol}\
-            &status={status}\
-            &baseCoin={base_coin}\
-            &limit={limit}\
-            &cursor={cursor}"
-        ))
-        .send()
-        .await?
-        .json::<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>>()
-        .await
-}
-
-pub async fn instr_info(
-    api_url: &str,
-    category: &str,
-    symbol: &str,
-    status: &str,
-    base_coin: &str,
-    timeout_ms: usize,
-) -> Result<RESULT_INSTR_INFO1, Box<dyn std::error::Error>> {
-    instr_info_req(
-        api_url,
-        category,
-        symbol,
-        status,
-        base_coin,
-        1,
-        "",
-        &Duration::from_millis(usizezero(timeout_ms) as u64),
-    )
-    .await?
-    .result
-    .list
-    .into_iter()
-    .next()
-    .ok_or(Box::from("not found"))
-}
-
-pub async fn instr_info_a(
-    api_url: &str,
-    category: &str,
-    symbol: &str,
-    status: &str,
-    base_coin: &str,
-    timeout_ms: usize,
-    timeout_cycle_ms: usize,
-) -> Result<RESULT_INSTR_INFO1, Box<dyn Error>> {
-    all_or_nothing(
-        async || instr_info(api_url, category, symbol, status, base_coin, timeout_ms).await,
-        timeout_cycle_ms,
-    )
-    .await
-}
-
-pub async fn instrs_info<'a>(
-    api_url: &'a str,
-    category: &'a str,
-    symbols: &'a [String],
-    status: &'a str,
-    base_coin: &'a str,
-    timeout_ms: usize,
-) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn std::error::Error>> {
-    let timeout_ms = Duration::from_millis(usizezero(timeout_ms) as u64);
-    let mut res = MAP::default();
-    let mut passed = vec![];
-    let mut cursor = "".to_string();
-    while passed.len() != symbols.len() {
-        let response_ = instr_info_req(
-            api_url,
-            category,
-            "",
-            status,
-            base_coin,
-            // fix this `limit` arg ↓
-            1000,
-            &cursor,
-            &timeout_ms,
-        )
-        .await?
-        .result;
-        cursor = response_.nextPageCursor.clone();
-        for v in response_.list.into_iter() {
-            for s in symbols {
-                if s == &v.symbol {
-                    res.insert(s.as_str(), v);
-                    passed.push(s.as_str());
-                    break;
-                }
-            }
+pub trait InstrumentsInfo<'a>: Exchange<'a> {
+    fn instr_info_req(
+        &'a self,
+        symbol: &str,
+        status: &str,
+        base_coin: &str,
+        limit: usize,
+        cursor: &str,
+    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>, Error_req>>;
+    fn instr_info(
+        &'a self,
+        symbol: &str,
+        status: &str,
+        base_coin: &str,
+    ) -> impl Future<Output = Result<RESULT_INSTR_INFO1, Box<dyn std::error::Error>>> {
+        async move {
+            self.instr_info_req(symbol, status, base_coin, 1, "")
+                .await?
+                .result
+                .list
+                .into_iter()
+                .next()
+                .ok_or(Box::from("not found"))
         }
     }
-    Ok(res)
+
+    fn instr_info_a(
+        &'a self,
+        symbol: &str,
+        status: &str,
+        base_coin: &str,
+    ) -> impl Future<Output = Result<RESULT_INSTR_INFO1, Box<dyn Error>>> {
+        async move {
+            all_or_nothing(
+                async || self.instr_info(symbol, status, base_coin).await,
+                usizezero(self.s().exch.timeout_cycle_ms),
+            )
+            .await
+        }
+    }
+
+    fn instrs_info(
+        &'a self,
+        symbols: &'a [String],
+        status: &'a str,
+        base_coin: &'a str,
+    ) -> impl Future<Output = Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn std::error::Error>>>
+    {
+        async move {
+            let mut res = MAP::default();
+            let mut passed = vec![];
+            let mut cursor = "".to_string();
+            while passed.len() != symbols.len() {
+                let response_ = self
+                    .instr_info_req(
+                        "", status, base_coin, // fix this `limit` arg ↓
+                        1000, &cursor,
+                    )
+                    .await?
+                    .result;
+                cursor = response_.nextPageCursor.clone();
+                for v in response_.list.into_iter() {
+                    for s in symbols {
+                        if s == &v.symbol {
+                            res.insert(s.as_str(), v);
+                            passed.push(s.as_str());
+                            break;
+                        }
+                    }
+                }
+            }
+            Ok(res)
+        }
+    }
+
+    fn instrs_info_a(
+        &'a self,
+        symbols: &'a [String],
+        status: &'a str,
+        base_coin: &'a str,
+    ) -> impl Future<Output = Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn Error>>> {
+        async move {
+            all_or_nothing(
+                || self.instrs_info(symbols, status, base_coin),
+                usizezero(self.s().exch.timeout_cycle_ms),
+            )
+            .await
+        }
+    }
 }
 
-pub async fn instrs_info_a<'a>(
-    api_url: &'a str,
-    category: &'a str,
-    symbols: &'a [String],
-    status: &'a str,
-    base_coin: &'a str,
-    timeout_ms: usize,
-    timeout_cycle_ms: usize,
-) -> Result<MAP<&'a str, RESULT_INSTR_INFO1>, Box<dyn Error>> {
-    all_or_nothing(
-        || instrs_info(api_url, category, symbols, status, base_coin, timeout_ms),
-        timeout_cycle_ms,
-    )
-    .await
+impl<'a> InstrumentsInfo<'a> for BYBIT<'a> {
+    fn instr_info_req(
+        &'a self,
+        symbol: &str,
+        status: &str,
+        base_coin: &str,
+        limit: usize,
+        cursor: &str,
+    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>, Error_req>> {
+        async move {
+            Client::builder()
+                .timeout(Duration::from_millis(
+                    usizezero(self.s().exch.timeout_req_ms) as u64,
+                ))
+                .build()?
+                .get(format!(
+                    "{}{INSTR_INFO}\
+                ?category={}\
+                &symbol={symbol}\
+                &status={status}\
+                &baseCoin={base_coin}\
+                &limit={limit}\
+                &cursor={cursor}",
+                    &self.s().exch.url,
+                    &self.s().trade.category,
+                ))
+                .send()
+                .await?
+                .json::<RESULT_EXCH_BYBIT<RESULT_INSTR_INFO>>()
+                .await
+        }
+    }
 }

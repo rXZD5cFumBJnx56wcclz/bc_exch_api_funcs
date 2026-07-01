@@ -1,24 +1,28 @@
-use std::time::Duration;
+use std::sync::LazyLock;
 
+use bc_utils_lg::settings::SETTINGS;
+use bc_utils_lg::settings::settings_from_json;
 use criterion::{Criterion, criterion_group, criterion_main};
 use tokio::runtime::Runtime;
 
+use bc_exch_api_funcs::bybit::exch_struct::BYBIT;
 use bc_exch_api_funcs::bybit::market::orderbook::*;
+
+static S: LazyLock<SETTINGS> =
+    LazyLock::new(|| settings_from_json("settings.json".into()).unwrap());
+static EXCH: LazyLock<BYBIT<'_>> = LazyLock::new(|| BYBIT::new(&*S));
 
 fn orderbook_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
-    let dur = Duration::from_secs(3);
     c.bench_function("orderbook_req_lch_1", |b| {
-        b.to_async(&rtm)
-            .iter(|| orderbook_req("https://api.bybit.com", "linear", "SUIUSDT", 10, &dur));
+        b.to_async(&rtm).iter(|| EXCH.orderbook_req("SUIUSDT", 10));
     });
 }
 
 fn orderbook_a_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
     c.bench_function("orderbook_a_lch_1", |b| {
-        b.to_async(&rtm)
-            .iter(|| orderbook_a("https://api.bybit.com", "linear", "SUIUSDT", 10, 3, 3));
+        b.to_async(&rtm).iter(|| EXCH.orderbook_a("SUIUSDT", 10));
     });
 }
 
@@ -30,8 +34,7 @@ fn orderbooks_lch_1(c: &mut Criterion) {
         "ATOMUSDT".to_string(),
     ];
     c.bench_function("orderbooks_lch_1", |b| {
-        b.to_async(&rtm)
-            .iter(|| orderbooks("https://api.bybit.com", "linear", symbols, 10, 3));
+        b.to_async(&rtm).iter(|| EXCH.orderbooks(symbols, 10));
     });
 }
 
@@ -43,8 +46,7 @@ fn orderbooks_a_lch_1(c: &mut Criterion) {
         "ATOMUSDT".to_string(),
     ];
     c.bench_function("orderbooks_a_lch_1", |b| {
-        b.to_async(&rtm)
-            .iter(|| orderbooks_a("https://api.bybit.com", "linear", symbols, 10, 3, 3));
+        b.to_async(&rtm).iter(|| EXCH.orderbooks_a(symbols, 10));
     });
 }
 

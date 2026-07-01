@@ -1,37 +1,29 @@
-use std::time::Duration;
+use std::sync::LazyLock;
 
+use bc_utils_lg::settings::SETTINGS;
+use bc_utils_lg::settings::settings_from_json;
 use tokio;
 
+use bc_exch_api_funcs::bybit::exch_struct::BYBIT;
 use bc_exch_api_funcs::bybit::market::instr_info::*;
+
+static S: LazyLock<SETTINGS> =
+    LazyLock::new(|| settings_from_json("settings.json".into()).unwrap());
+static EXCH: LazyLock<BYBIT<'_>> = LazyLock::new(|| BYBIT::new(&*S));
 
 #[tokio::test]
 async fn instr_info_req_lch_1() {
-    instr_info_req(
-        "https://api.bybit.com",
-        "linear",
-        "BTCUSDT",
-        "",
-        "",
-        1,
-        "",
-        &Duration::from_millis(5000u64),
-    )
-    .await
-    .unwrap();
+    EXCH.instr_info_req("BTCUSDT", "", "", 1, "").await.unwrap();
 }
 
 #[tokio::test]
 async fn instr_info_lch_1() {
-    instr_info("https://api.bybit.com", "linear", "SUIUSDT", "", "", 5000)
-        .await
-        .unwrap();
+    EXCH.instr_info("SUIUSDT", "", "").await.unwrap();
 }
 
 #[tokio::test]
 async fn instrs_info_lch_1() {
-    instrs_info(
-        "https://api.bybit.com",
-        "linear",
+    EXCH.instrs_info(
         &[
             "SUIUSDT".to_string(),
             "UNIUSDT".to_string(),
@@ -39,7 +31,6 @@ async fn instrs_info_lch_1() {
         ],
         "",
         "",
-        5000,
     )
     .await
     .unwrap();
@@ -47,9 +38,7 @@ async fn instrs_info_lch_1() {
 
 #[tokio::test]
 async fn instrs_info_a_lch_1() {
-    instrs_info_a(
-        "https://api.bybit.com",
-        "linear",
+    EXCH.instrs_info_a(
         &[
             "SUIUSDT".to_string(),
             "UNIUSDT".to_string(),
@@ -57,8 +46,6 @@ async fn instrs_info_a_lch_1() {
         ],
         "",
         "",
-        5000,
-        6000,
     )
     .await
     .unwrap();

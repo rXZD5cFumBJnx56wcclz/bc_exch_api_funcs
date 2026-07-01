@@ -12,6 +12,7 @@ use reqwest::{Client, Error as Error_req};
 use serde::{Deserialize, Serialize};
 
 use crate::bybit::const_url::ORDERBOOK;
+use crate::bybit::exch_struct::{BYBIT, Exchange};
 use crate::bybit::result_req::RESULT_EXCH_BYBIT;
 use crate::deffunc::usizezero;
 
@@ -26,103 +27,94 @@ pub struct RESULT_ORDERBOOK {
     pub cts: i64,
 }
 
-pub async fn orderbook_req(
-    api_url: &str,
-    category: &str,
-    symbol: &str,
-    limit: usize,
-    timeout_ms: &Duration,
-) -> Result<RESULT_EXCH_BYBIT<RESULT_ORDERBOOK>, Error_req> {
-    Client::builder()
-        .timeout(*timeout_ms)
-        .build()?
-        .get(format!(
-            "{api_url}\
-            {ORDERBOOK}\
-            ?category={category}\
-            &symbol={symbol}\
-        &limit={limit}"
-        ))
-        .send()
-        .await?
-        .json()
-        .await
-}
+pub trait Orderbook<'a>: Exchange<'a> {
+    fn orderbook_req(
+        &'a self,
+        symbol: &str,
+        limit: usize,
+    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_ORDERBOOK>, Error_req>>;
+    fn orderbook(
+        &'a self,
+        symbol: &str,
+        limit: usize,
+    ) -> impl Future<Output = Result<RESULT_ORDERBOOK, Box<dyn std::error::Error>>> {
+        async move { Ok(self.orderbook_req(symbol, limit).await?.result) }
+    }
 
-pub async fn orderbook(
-    api_url: &str,
-    category: &str,
-    symbol: &str,
-    limit: usize,
-    timeout_ms: usize,
-) -> Result<RESULT_ORDERBOOK, Box<dyn std::error::Error>> {
-    Ok(orderbook_req(
-        api_url,
-        category,
-        symbol,
-        limit,
-        &Duration::from_millis(usizezero(timeout_ms) as u64),
-    )
-    .await?
-    .result)
-}
-
-pub async fn orderbook_a(
-    api_url: &str,
-    category: &str,
-    symbol: &str,
-    limit: usize,
-    timeout_ms: usize,
-    timeout_cycle_ms: usize,
-) -> Result<RESULT_ORDERBOOK, Box<dyn Error>> {
-    all_or_nothing(
-        async || orderbook(api_url, category, symbol, limit, timeout_ms).await,
-        timeout_cycle_ms,
-    )
-    .await
-}
-
-pub async fn orderbooks<'a>(
-    api_url: &str,
-    category: &str,
-    symbols: &'a [String],
-    limit: usize,
-    timeout_ms: usize,
-) -> MAP<&'a str, Result<RESULT_ORDERBOOK, Box<dyn std::error::Error>>> {
-    join_all(symbols.iter().map(|v| async {
-        (
-            v.as_str(),
-            orderbook(api_url, category, v.as_str(), limit, timeout_ms).await,
-        )
-    }))
-    .await
-    .into_iter()
-    .collect()
-}
-
-pub async fn orderbooks_a<'a>(
-    api_url: &str,
-    category: &str,
-    symbols: &'a [String],
-    limit: usize,
-    timeout_ms: usize,
-    timeout_cycle_ms: usize,
-) -> Result<MAP<&'a str, RESULT_ORDERBOOK>, Box<dyn Error>> {
-    join_all(symbols.iter().map(|v| async {
-        Ok((
-            v.as_str(),
-            orderbook_a(
-                api_url,
-                category,
-                v.as_str(),
-                limit,
-                timeout_ms,
-                timeout_cycle_ms,
+    fn orderbook_a(
+        &'a self,
+        symbol: &str,
+        limit: usize,
+    ) -> impl Future<Output = Result<RESULT_ORDERBOOK, Box<dyn Error>>> {
+        async move {
+            all_or_nothing(
+                async || self.orderbook(symbol, limit).await,
+                usizezero(self.s().exch.timeout_cycle_ms),
             )
-            .await?,
-        ))
-    }))
-    .await
-    .into_iter()
-    .collect::<Result<_, Box<dyn Error>>>()
+            .await
+        }
+    }
+
+    fn orderbooks(
+        &'a self,
+        symbols: &'a [String],
+        limit: usize,
+    ) -> impl Future<Output = MAP<&'a str, Result<RESULT_ORDERBOOK, Box<dyn std::error::Error>>>>
+    {
+        async move {
+            join_all(
+                symbols
+                    .iter()
+                    .map(|v| async { (v.as_str(), self.orderbook(v.as_str(), limit).await) }),
+            )
+            .await
+            .into_iter()
+            .collect()
+        }
+    }
+
+    fn orderbooks_a(
+        &'a self,
+        symbols: &'a [String],
+        limit: usize,
+    ) -> impl Future<Output = Result<MAP<&'a str, RESULT_ORDERBOOK>, Box<dyn Error>>> {
+        async move {
+            join_all(
+                symbols.iter().map(|v| async {
+                    Ok((v.as_str(), self.orderbook_a(v.as_str(), limit).await?))
+                }),
+            )
+            .await
+            .into_iter()
+            .collect::<Result<_, Box<dyn Error>>>()
+        }
+    }
+}
+
+impl<'a> Orderbook<'a> for BYBIT<'a> {
+    fn orderbook_req(
+        &'a self,
+        symbol: &str,
+        limit: usize,
+    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_ORDERBOOK>, Error_req>> {
+        async move {
+            Client::builder()
+                .timeout(Duration::from_millis(
+                    usizezero(self.s.exch.timeout_req_ms) as u64
+                ))
+                .build()?
+                .get(format!(
+                    "{}\
+                {ORDERBOOK}\
+                ?category={}\
+                &symbol={symbol}\
+                &limit={limit}",
+                    &self.s.exch.url, &self.s.trade.category,
+                ))
+                .send()
+                .await?
+                .json()
+                .await
+        }
+    }
 }

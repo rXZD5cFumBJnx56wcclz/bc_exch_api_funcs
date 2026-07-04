@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bc_utils_lg::settings::SETTINGS;
+use bc_utils_lg::structs::settings::SETTINGS;
 use reqwest::Client;
 
 use crate::deffunc::usizezero;

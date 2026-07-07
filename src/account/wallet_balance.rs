@@ -70,35 +70,3 @@ pub trait WalletBalance: Exchange {
         async move { all_or_nothing(|| self.wallet_balance(coin), timeout_cycle_ms).await }
     }
 }
-
-impl WalletBalance for BYBIT<'_> {
-    fn wallet_balance_req<'a>(
-        &'a self,
-
-        coin: &str,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_WALLET_BALANCE>, Error_req>> {
-        async move {
-            let time_stamp = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_millis();
-            let query = format!("accountType={}&coin={coin}", &self.s.trade.account_type);
-            self.client
-                .get(format!("{}{}?{}", &self.s.exch.url, WALLET_BALANCE, query))
-                .header(
-                    "X-BAPI-SIGN",
-                    hmac_(
-                        self.s.exch.secret.as_bytes(),
-                        format!("{}{}{}{}", time_stamp, &self.s.exch.key, 5000, query).as_bytes(),
-                    ),
-                )
-                .header("X-BAPI-API-KEY", &self.s.exch.key)
-                .header("X-BAPI-TIMESTAMP", time_stamp.to_string())
-                .header("X-BAPI-RECV-WINDOW", 5000)
-                .send()
-                .await?
-                .json()
-                .await
-        }
-    }
-}

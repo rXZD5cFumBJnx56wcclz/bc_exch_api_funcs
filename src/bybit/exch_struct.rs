@@ -1,9 +1,10 @@
 use std::time::Duration;
 
-use bc_utils_lg::structs::settings::SETTINGS;
 use reqwest::Client;
+use bc_utils_lg::structs::settings::SETTINGS;
 
 use crate::deffunc::usizezero;
+use crate::main_trait::Exchange;
 
 #[derive(Debug, Clone)]
 pub struct BYBIT<'a> {
@@ -25,12 +26,8 @@ impl<'a> BYBIT<'a> {
     }
 }
 
-pub trait Exchange<'a> {
-    fn s(&'a self) -> &'a SETTINGS;
-}
-
-impl<'a> Exchange<'a> for BYBIT<'a> {
-    fn s(&'a self) -> &'a SETTINGS {
+impl Exchange for BYBIT<'_> {
+    fn s<'a>(&'a self) -> &'a SETTINGS {
         &self.s
     }
 }

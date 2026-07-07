@@ -5,7 +5,7 @@ use crate::bybit::const_url::KLINE;
 use crate::bybit::prelude::*;
 
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
-pub struct RESULT_KLINE {
+pub struct RESULT_WRAP_KLINE {
     pub symbol: String,
     pub category: String,
     pub list: Vec<Vec<String>>,
@@ -18,7 +18,7 @@ pub trait Kline: for<'a> Exchange {
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_KLINE>, Error_req>>;
+    ) -> impl Future<Output = Result<impl ResultWrap<ResultWrap<Vec<Vec<String>>>>, Error_req>>;
     /// the function returns values from the beginning of the start to the end (in ascending order)
     /// It's a cumbersome implementation, but I don't want to fuck with it right now.
     fn klines<'b>(
@@ -194,36 +194,6 @@ pub trait Kline: for<'a> Exchange {
             .await
             .into_iter()
             .collect::<Result<_, Box<dyn Error>>>()
-        }
-    }
-}
-
-impl Kline for BYBIT<'_> {
-    fn klines_req(
-        &self,
-        symbol: &str,
-        limit: usize,
-        start: usize,
-        end: usize,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_KLINE>, Error_req>> {
-        async move {
-            self.client
-                .get(format!(
-                    "{}{KLINE}\
-                        ?category={}\
-                        &symbol={symbol}\
-                        &interval={}\
-                        &limit={limit}\
-                        &start={start}\
-                        &end={end}",
-                    self.s().exch.url,
-                    self.s().trade.category,
-                    self.s().trade.timeframe,
-                ))
-                .send()
-                .await?
-                .json::<RESULT_EXCH_BYBIT<RESULT_KLINE>>()
-                .await
         }
     }
 }

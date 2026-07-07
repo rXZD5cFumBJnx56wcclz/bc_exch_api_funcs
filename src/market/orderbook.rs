@@ -78,27 +78,3 @@ pub trait Orderbook: Exchange {
         }
     }
 }
-
-impl Orderbook for BYBIT<'_> {
-    fn orderbook_req<'a>(
-        &'a self,
-        symbol: &str,
-        limit: usize,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_ORDERBOOK>, Error_req>> {
-        async move {
-            self.client
-                .get(format!(
-                    "{}\
-                {ORDERBOOK}\
-                ?category={}\
-                &symbol={symbol}\
-                &limit={limit}",
-                    &self.s.exch.url, &self.s.trade.category,
-                ))
-                .send()
-                .await?
-                .json()
-                .await
-        }
-    }
-}

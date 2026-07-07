@@ -44,7 +44,7 @@ pub trait Symbols: Exchange {
         symbol: &str,
         base_coin: &str,
         exp_date: &str,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>, Error_req>>;
+    ) -> impl Future<Output = Result<impl ResultWrap<RESULT_SYMBOLS>, Error_req>>;
     fn symbols<'a>(
         &'a self,
         symbol: &str,
@@ -59,7 +59,6 @@ pub trait Symbols: Exchange {
                 .list)
         }
     }
-
     fn symbols_a<'a>(
         &'a self,
         symbol: &str,
@@ -72,31 +71,6 @@ pub trait Symbols: Exchange {
                 usizezero(self.s().exch.timeout_cycle_ms),
             )
             .await
-        }
-    }
-}
-
-impl Symbols for BYBIT<'_> {
-    fn symbols_req<'a>(
-        &'a self,
-        symbol: &str,
-        base_coin: &str,
-        exp_date: &str,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>, Error_req>> {
-        async move {
-            self.client
-                .get(format!(
-                    "{}{TICKERS}\
-                        ?category={}\
-                        &symbol={symbol}\
-                        &baseCoin={base_coin}\
-                        &expDate={exp_date}",
-                    &self.s.exch.url, &self.s.trade.category,
-                ))
-                .send()
-                .await?
-                .json::<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>>()
-                .await
         }
     }
 }

@@ -3,3 +3,4 @@ pub mod bybit;
 pub mod deffunc;
 pub mod main_trait;
 pub mod market;
+pub mod prelude;

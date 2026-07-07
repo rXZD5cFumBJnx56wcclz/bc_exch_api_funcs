@@ -2,7 +2,7 @@
 #![allow(non_snake_case)]
 
 use crate::bybit::market::klines::*;
-use crate::bybit::prelude::*;
+use crate::prelude::*;
 
 pub trait Src: Exchange + Kline {
     fn src<'a>(

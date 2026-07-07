@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use crate::bybit::prelude::*;
+use crate::prelude::*;
 
 pub trait Kline: Exchange {
     fn klines_req<'a>(

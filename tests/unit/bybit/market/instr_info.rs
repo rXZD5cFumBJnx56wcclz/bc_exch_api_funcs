@@ -1,6 +1,5 @@
-use bc_exch_api_funcs::bybit::market::instr_info::*;
-
 use crate::unit::bybit::prelude::*;
+use bc_exch_api_funcs::bybit::market::instr_info::*;
 
 #[tokio::test]
 async fn instr_info_req_lch_1() {

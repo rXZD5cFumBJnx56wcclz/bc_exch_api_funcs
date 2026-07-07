@@ -98,4 +98,3 @@ async fn klines_symbols_a_lch_1() {
         .await
         .unwrap();
 }
-

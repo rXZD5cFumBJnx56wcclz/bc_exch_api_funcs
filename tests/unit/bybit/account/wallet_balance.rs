@@ -1,6 +1,5 @@
-use bc_exch_api_funcs::bybit::account::wallet_balance::*;
-
 use crate::unit::bybit::prelude::*;
+use bc_exch_api_funcs::bybit::account::wallet_balance::*;
 
 #[tokio::test]
 async fn wallet_balance_req_lch_1() {

@@ -1,71 +1,43 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use crate::bybit::const_url::TICKERS;
-use crate::bybit::prelude::*;
+use crate::{bybit::prelude::*, market::symbols::SYMBOLS1};
+pub const TICKERS: &str = "/v5/market/tickers";
 
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
-pub struct RESULT_SYMBOLS1 {
-    pub symbol: String,
-    pub lastPrice: String,
-    pub indexPrice: String,
-    pub markPrice: String,
-    pub prevPrice24h: String,
-    pub price24hPcnt: String,
-    pub highPrice24h: String,
-    pub lowPrice24h: String,
-    pub prevPrice1h: String,
-    pub openInterest: String,
-    pub openInterestValue: String,
-    pub turnover24h: String,
-    pub volume24h: String,
-    pub fundingRate: String,
-    pub nextFundingTime: String,
-    pub predictedDeliveryPrice: String,
-    pub basisRate: String,
-    pub deliveryFeeRate: String,
-    pub deliveryTime: String,
-    pub ask1Size: String,
-    pub bid1Price: String,
-    pub ask1Price: String,
-    pub bid1Size: String,
-    pub basis: String,
-}
-
-#[derive(Serialize, Deserialize, std::fmt::Debug)]
-pub struct RESULT_SYMBOLS {
+pub struct WRAP_SYMBOLS {
     pub category: String,
-    pub list: Vec<RESULT_SYMBOLS1>,
+    pub list: Vec<SYMBOLS1>,
 }
 
-pub trait Symbols<'a>: Exchange<'a> {
-    fn symbols_req(
+impl ResultWrap<Vec<SYMBOLS1>> for RESULT_EXCH_BYBIT<WRAP_SYMBOLS> {
+    fn res(self) -> Vec<SYMBOLS1> {
+        self.result.list
+    }
+}
+
+pub trait Symbols: Exchange {
+    fn symbols_req<'a>(
         &'a self,
         symbol: &str,
         base_coin: &str,
         exp_date: &str,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>, Error_req>>;
-    fn symbols(
+    ) -> impl Future<Output = Result<impl ResultWrap<Vec<SYMBOLS1>>, Error_req>>;
+    fn symbols<'a>(
         &'a self,
         symbol: &str,
         base_coin: &str,
         exp_date: &str,
-    ) -> impl Future<Output = Result<Vec<RESULT_SYMBOLS1>, Box<dyn std::error::Error>>> {
-        async move {
-            Ok(self
-                .symbols_req(symbol, base_coin, exp_date)
-                .await?
-                .result
-                .list)
-        }
+    ) -> impl Future<Output = Result<Vec<SYMBOLS1>, Box<dyn std::error::Error>>> {
+        async move { Ok(self.symbols_req(symbol, base_coin, exp_date).await?.res()) }
     }
 
-    fn symbols_a(
+    fn symbols_a<'a>(
         &'a self,
         symbol: &str,
         base_coin: &str,
         exp_date: &str,
-    ) -> impl Future<Output = Result<Vec<RESULT_SYMBOLS1>, Box<dyn Error>>> {
+    ) -> impl Future<Output = Result<Vec<SYMBOLS1>, Box<dyn Error>>> {
         async move {
             all_or_nothing(
                 async || self.symbols(symbol, base_coin, exp_date).await,
@@ -76,13 +48,13 @@ pub trait Symbols<'a>: Exchange<'a> {
     }
 }
 
-impl<'a> Symbols<'a> for BYBIT<'a> {
-    fn symbols_req(
+impl Symbols for BYBIT<'_> {
+    fn symbols_req<'a>(
         &'a self,
         symbol: &str,
         base_coin: &str,
         exp_date: &str,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>, Error_req>> {
+    ) -> impl Future<Output = Result<impl ResultWrap<Vec<SYMBOLS1>>, Error_req>> {
         async move {
             self.client
                 .get(format!(
@@ -95,7 +67,7 @@ impl<'a> Symbols<'a> for BYBIT<'a> {
                 ))
                 .send()
                 .await?
-                .json::<RESULT_EXCH_BYBIT<RESULT_SYMBOLS>>()
+                .json::<RESULT_EXCH_BYBIT<WRAP_SYMBOLS>>()
                 .await
         }
     }

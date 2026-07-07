@@ -1,6 +1,5 @@
-use bc_exch_api_funcs::bybit::market::oi::*;
-
 use crate::unit::bybit::prelude::*;
+use bc_exch_api_funcs::bybit::market::oi::*;
 
 #[tokio::test]
 async fn oi_req_lch_1() {

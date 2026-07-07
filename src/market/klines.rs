@@ -1,28 +1,20 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use crate::bybit::const_url::KLINE;
 use crate::bybit::prelude::*;
 
-#[derive(Serialize, Deserialize, std::fmt::Debug)]
-pub struct RESULT_WRAP_KLINE {
-    pub symbol: String,
-    pub category: String,
-    pub list: Vec<Vec<String>>,
-}
-
-pub trait Kline: for<'a> Exchange {
-    fn klines_req<'b>(
-        &'b self,
+pub trait Kline: Exchange {
+    fn klines_req<'a>(
+        &'a self,
         symbol: &str,
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<impl ResultWrap<ResultWrap<Vec<Vec<String>>>>, Error_req>>;
+    ) -> impl Future<Output = Result<impl ResultWrap<Vec<Vec<String>>>, Error_req>>;
     /// the function returns values from the beginning of the start to the end (in ascending order)
     /// It's a cumbersome implementation, but I don't want to fuck with it right now.
-    fn klines<'b>(
-        &'b self,
+    fn klines<'a>(
+        &'a self,
         symbol: &str,
         limit: usize,
         start: usize,
@@ -52,11 +44,7 @@ pub trait Kline: for<'a> Exchange {
             let mut futures = Vec::with_capacity(limit);
             for s in (start..end).step_by(step) {
                 futures.push(async move {
-                    let mut res = self
-                        .klines_req(symbol, limit, s, s + step)
-                        .await?
-                        .result
-                        .list;
+                    let mut res = self.klines_req(symbol, limit, s, s + step).await?.res();
                     res.reverse();
                     Ok::<Vec<Vec<f64>>, Box<dyn Error>>(
                         res.into_iter()
@@ -75,8 +63,8 @@ pub trait Kline: for<'a> Exchange {
             Ok(klines)
         }
     }
-    fn klines_a<'b>(
-        &'b self,
+    fn klines_a<'a>(
+        &'a self,
         symbol: &str,
         limit: usize,
         start: usize,
@@ -91,9 +79,9 @@ pub trait Kline: for<'a> Exchange {
         }
     }
 
-    fn kline_symbols<'b>(
-        &'b self,
-        symbols: &'b [String],
+    fn kline_symbols<'a>(
+        &'a self,
+        symbols: &'a [String],
     ) -> impl Future<Output = MAP<String, Result<Vec<f64>, Box<dyn std::error::Error>>>> {
         async move {
             join_all(symbols.iter().map(|s| async {
@@ -115,9 +103,9 @@ pub trait Kline: for<'a> Exchange {
         }
     }
 
-    fn kline_symbols_a<'b>(
-        &'b self,
-        symbols: &'b [String],
+    fn kline_symbols_a<'a>(
+        &'a self,
+        symbols: &'a [String],
     ) -> impl Future<Output = Result<MAP<String, Vec<f64>>, Box<dyn Error>>> {
         async move {
             join_all(symbols.iter().map(|s| async {
@@ -138,9 +126,9 @@ pub trait Kline: for<'a> Exchange {
         }
     }
 
-    fn kline_symbols_ao<'b>(
-        &'b self,
-        symbols: &'b [String],
+    fn kline_symbols_ao<'a>(
+        &'a self,
+        symbols: &'a [String],
     ) -> impl Future<Output = Result<MAP<String, Vec<f64>>, Box<dyn Error>>> {
         async move {
             one_time_hm(
@@ -159,9 +147,9 @@ pub trait Kline: for<'a> Exchange {
         }
     }
 
-    fn klines_symbols<'b>(
-        &'b self,
-        symbols: &'b [String],
+    fn klines_symbols<'a>(
+        &'a self,
+        symbols: &'a [String],
         limit: usize,
         start: usize,
         end: usize,
@@ -178,18 +166,18 @@ pub trait Kline: for<'a> Exchange {
         }
     }
 
-    fn klines_symbols_a<'b>(
-        &'b self,
-        symbols: &'b [String],
+    fn klines_symbols_a<'a>(
+        &'a self,
+        symbols: &'a [String],
         limit: usize,
         start: usize,
         end: usize,
     ) -> impl Future<Output = Result<MAP<String, Vec<Vec<f64>>>, Box<dyn Error>>> {
         async move {
             join_all(
-                symbols.iter().map(|s| async {
-                    Ok((s.clone(), self.klines_a(s, limit, start, end).await?))
-                }),
+                symbols
+                    .iter()
+                    .map(|s| async { Ok((s.clone(), self.klines_a(s, limit, start, end).await?)) }),
             )
             .await
             .into_iter()

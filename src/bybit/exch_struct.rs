@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use reqwest::Client;
 use bc_utils_lg::structs::settings::SETTINGS;
+use reqwest::Client;
 
 use crate::deffunc::usizezero;
 use crate::main_trait::Exchange;

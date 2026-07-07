@@ -1,8 +1,6 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-// use std::iter::zip;
-
 use crate::bybit::market::klines::*;
 use crate::bybit::prelude::*;
 

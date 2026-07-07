@@ -1,6 +1,5 @@
-use bc_exch_api_funcs::bybit::account::acc_info::*;
-
 use crate::unit::bybit::prelude::*;
+use bc_exch_api_funcs::bybit::account::acc_info::*;
 
 #[tokio::test]
 async fn acc_info_req_lch_1() {

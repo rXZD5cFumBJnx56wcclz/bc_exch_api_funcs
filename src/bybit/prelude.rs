@@ -8,7 +8,7 @@ pub use futures::future::join_all;
 pub use reqwest::{Client, Error as Error_req};
 pub use serde::{Deserialize, Serialize};
 
-pub use crate::main_trait::*;
 pub use crate::bybit::exch_struct::BYBIT;
 pub use crate::bybit::result_req::RESULT_EXCH_BYBIT;
 pub use crate::deffunc::usizezero;
+pub use crate::main_trait::*;

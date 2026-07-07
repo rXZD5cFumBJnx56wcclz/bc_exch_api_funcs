@@ -1,6 +1,5 @@
-use bc_exch_api_funcs::bybit::market::orderbook::*;
-
 use crate::unit::bybit::prelude::*;
+use bc_exch_api_funcs::bybit::market::orderbook::*;
 
 #[tokio::test]
 async fn orderbook_req_lch_1() {

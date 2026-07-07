@@ -3,8 +3,6 @@
 
 use crate::bybit::prelude::*;
 
-pub const INSTR_INFO: &str = "/v5/market/instruments-info";
-
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
 pub struct INSTR_INFO2_LEVERAGE_FILTER {
     pub minLeverage: String,
@@ -61,38 +59,27 @@ pub struct INSTR_INFO1 {
 }
 
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
-pub struct RESULT_WRAP_INSTR_INFO {
+pub struct INSTR_INFO {
     pub category: String,
     pub list: Vec<INSTR_INFO1>,
     pub nextPageCursor: String,
 }
 
-impl ResultWrap<Vec<INSTR_INFO1>> for RESULT_WRAP_INSTR_INFO {
+impl ResultWrap<Vec<INSTR_INFO1>> for INSTR_INFO {
     fn res(self) -> Vec<INSTR_INFO1> {
         self.list
     }
 }
 
-impl<T> ResultWrap<T> for RESULT_EXCH_BYBIT<T> 
-where 
-    T: ResultWrap<Vec<INSTR_INFO1>>
-{
-    fn res(self) -> T {
-        self.result
-    }
-}
-
 pub trait InstrumentsInfo: Exchange {
-    fn instr_info_req<'a, T>(
+    fn instr_info_req<'a>(
         &'a self,
         symbol: &str,
         status: &str,
         base_coin: &str,
         limit: usize,
         cursor: &str,
-    ) -> impl Future<Output = Result<impl ResultWrap<RESULT_WRAP_INSTR_INFO>, Error_req>>
-    where 
-        T: ResultWrap<Vec<INSTR_INFO1>>;
+    ) -> impl Future<Output = Result<impl ResultWrap<INSTR_INFO>, Error_req>>;
     fn instr_info<'a>(
         &'a self,
         symbol: &str,
@@ -100,7 +87,7 @@ pub trait InstrumentsInfo: Exchange {
         base_coin: &str,
     ) -> impl Future<Output = Result<INSTR_INFO1, Box<dyn std::error::Error>>> {
         async move {
-            self.instr_info_req::<RESULT_WRAP_INSTR_INFO>(symbol, status, base_coin, 1, "")
+            self.instr_info_req(symbol, status, base_coin, 1, "")
                 .await?
                 .res()
                 .res()
@@ -130,15 +117,14 @@ pub trait InstrumentsInfo: Exchange {
         symbols: &'a [String],
         status: &'a str,
         base_coin: &'a str,
-    ) -> impl Future<Output = Result<MAP<&'a str, INSTR_INFO1>, Box<dyn std::error::Error>>>
-    {
+    ) -> impl Future<Output = Result<MAP<&'a str, INSTR_INFO1>, Box<dyn std::error::Error>>> {
         async move {
             let mut res = MAP::default();
             let mut passed = vec![];
             let mut cursor = "".to_string();
             while passed.len() != symbols.len() {
                 let response_ = self
-                    .instr_info_req::<RESULT_WRAP_INSTR_INFO>(
+                    .instr_info_req(
                         "", status, base_coin, // fix this `limit` arg ↓
                         1000, &cursor,
                     )

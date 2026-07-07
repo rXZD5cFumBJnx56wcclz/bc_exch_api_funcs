@@ -1,11 +1,10 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 
-use crate::bybit::const_url::WALLET_BALANCE;
 use crate::bybit::prelude::*;
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct RESULT_WALLET_BALANCE2 {
+pub struct WALLET_BALANCE1 {
     pub availableToBorrow: String,
     pub bonus: String,
     pub accruedInterest: String,
@@ -27,7 +26,7 @@ pub struct RESULT_WALLET_BALANCE2 {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct RESULT_WALLET_BALANCE1 {
+pub struct WALLET_BALANCE {
     pub totalEquity: String,
     pub accountIMRate: String,
     pub totalMarginBalance: String,
@@ -39,12 +38,7 @@ pub struct RESULT_WALLET_BALANCE1 {
     pub totalWalletBalance: String,
     pub accountLTV: String,
     pub totalMaintenanceMargin: String,
-    pub coin: Vec<RESULT_WALLET_BALANCE2>,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct RESULT_WALLET_BALANCE {
-    pub list: Vec<RESULT_WALLET_BALANCE1>,
+    pub coin: Vec<WALLET_BALANCE1>,
 }
 
 pub trait WalletBalance: Exchange {
@@ -52,13 +46,13 @@ pub trait WalletBalance: Exchange {
         &'a self,
 
         coin: &str,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_WALLET_BALANCE>, Error_req>>;
+    ) -> impl Future<Output = Result<impl ResultWrap<Vec<WALLET_BALANCE>>, Error_req>>;
     fn wallet_balance<'a>(
         &'a self,
 
         coin: &str,
-    ) -> impl Future<Output = Result<Vec<RESULT_WALLET_BALANCE1>, Box<dyn std::error::Error>>> {
-        async move { Ok(self.wallet_balance_req(coin).await?.result.list) }
+    ) -> impl Future<Output = Result<Vec<WALLET_BALANCE>, Box<dyn std::error::Error>>> {
+        async move { Ok(self.wallet_balance_req(coin).await?.res()) }
     }
 
     fn wallet_balance_a<'a>(
@@ -66,7 +60,7 @@ pub trait WalletBalance: Exchange {
 
         coin: &str,
         timeout_cycle_ms: usize,
-    ) -> impl Future<Output = Result<Vec<RESULT_WALLET_BALANCE1>, Box<dyn Error>>> {
+    ) -> impl Future<Output = Result<Vec<WALLET_BALANCE>, Box<dyn Error>>> {
         async move { all_or_nothing(|| self.wallet_balance(coin), timeout_cycle_ms).await }
     }
 }

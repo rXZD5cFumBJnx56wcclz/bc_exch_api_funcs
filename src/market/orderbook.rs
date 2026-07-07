@@ -1,11 +1,10 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use crate::bybit::const_url::ORDERBOOK;
 use crate::bybit::prelude::*;
 
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
-pub struct RESULT_ORDERBOOK {
+pub struct ORDERBOOK {
     pub s: String,
     pub a: Vec<Vec<String>>,
     pub b: Vec<Vec<String>>,
@@ -20,20 +19,20 @@ pub trait Orderbook: Exchange {
         &'a self,
         symbol: &str,
         limit: usize,
-    ) -> impl Future<Output = Result<RESULT_EXCH_BYBIT<RESULT_ORDERBOOK>, Error_req>>;
+    ) -> impl Future<Output = Result<impl ResultWrap<ORDERBOOK>, Error_req>>;
     fn orderbook<'a>(
         &'a self,
         symbol: &str,
         limit: usize,
-    ) -> impl Future<Output = Result<RESULT_ORDERBOOK, Box<dyn std::error::Error>>> {
-        async move { Ok(self.orderbook_req(symbol, limit).await?.result) }
+    ) -> impl Future<Output = Result<ORDERBOOK, Box<dyn std::error::Error>>> {
+        async move { Ok(self.orderbook_req(symbol, limit).await?.res()) }
     }
 
     fn orderbook_a<'a>(
         &'a self,
         symbol: &str,
         limit: usize,
-    ) -> impl Future<Output = Result<RESULT_ORDERBOOK, Box<dyn Error>>> {
+    ) -> impl Future<Output = Result<ORDERBOOK, Box<dyn Error>>> {
         async move {
             all_or_nothing(
                 async || self.orderbook(symbol, limit).await,
@@ -47,8 +46,7 @@ pub trait Orderbook: Exchange {
         &'a self,
         symbols: &'a [String],
         limit: usize,
-    ) -> impl Future<Output = MAP<&'a str, Result<RESULT_ORDERBOOK, Box<dyn std::error::Error>>>>
-    {
+    ) -> impl Future<Output = MAP<&'a str, Result<ORDERBOOK, Box<dyn std::error::Error>>>> {
         async move {
             join_all(
                 symbols
@@ -65,7 +63,7 @@ pub trait Orderbook: Exchange {
         &'a self,
         symbols: &'a [String],
         limit: usize,
-    ) -> impl Future<Output = Result<MAP<&'a str, RESULT_ORDERBOOK>, Box<dyn Error>>> {
+    ) -> impl Future<Output = Result<MAP<&'a str, ORDERBOOK>, Box<dyn Error>>> {
         async move {
             join_all(
                 symbols.iter().map(|v| async {

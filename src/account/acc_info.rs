@@ -17,10 +17,10 @@ pub struct ACC_INFO {
 
 pub trait AccInfo: Exchange {
     fn acc_info_req<'a>(
-        &'a self,
+        &'a self
     ) -> impl Future<Output = Result<impl ResultWrap<ACC_INFO>, Error_req>>;
     fn acc_info<'a>(
-        &'a self,
+        &'a self
     ) -> impl Future<Output = Result<ACC_INFO, Box<dyn std::error::Error>>> {
         async move { Ok(self.acc_info_req().await?.res()) }
     }

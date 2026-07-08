@@ -28,11 +28,7 @@ fn instr_info_a_lch_1(c: &mut Criterion) {
 
 fn instrs_info_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
-    let symbols = &[
-        "SUIUSDT".to_string(),
-        "UNIUSDT".to_string(),
-        "ETHUSDT".to_string(),
-    ];
+    let symbols = &["SUIUSDT".to_string(), "UNIUSDT".to_string(), "ETHUSDT".to_string()];
     c.bench_function("instrs_info_lch_1", |b| {
         b.to_async(&rtm).iter(|| EXCH.instrs_info(symbols, "", ""));
     });
@@ -40,11 +36,7 @@ fn instrs_info_lch_1(c: &mut Criterion) {
 
 fn instrs_info_a_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
-    let symbols = &[
-        "SUIUSDT".to_string(),
-        "UNIUSDT".to_string(),
-        "ETHUSDT".to_string(),
-    ];
+    let symbols = &["SUIUSDT".to_string(), "UNIUSDT".to_string(), "ETHUSDT".to_string()];
     c.bench_function("instrs_info_a_lch_1", |b| {
         b.to_async(&rtm)
             .iter(|| EXCH.instrs_info_a(symbols, "", ""));

@@ -52,3 +52,22 @@ impl OpenInterest for BYBIT<'_> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::bybit::market::oi::*;
+    use crate::bybit::prelude_tests::prelude::*;
+
+    #[tokio::test]
+    async fn oi_req_lch_1() {
+        println!("{:#?}", EXCH.oi_req("SUIUSDT", "5min", 0, 0, 1, "",).await);
+    }
+
+    #[tokio::test]
+    async fn oi_a_lch_1() {
+        println!(
+            "{:#?}",
+            EXCH.oi_a("SUIUSDT", "5min", 0, 0, 1, "",).await.unwrap()
+        );
+    }
+}

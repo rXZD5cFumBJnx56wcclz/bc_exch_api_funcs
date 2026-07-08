@@ -13,7 +13,7 @@ impl ResultWrap<ACC_INFO> for RESULT_EXCH_BYBIT<ACC_INFO> {
 
 impl AccInfo for BYBIT<'_> {
     fn acc_info_req<'a>(
-        &'a self,
+        &'a self
     ) -> impl Future<Output = Result<impl ResultWrap<ACC_INFO>, Error_req>> {
         async move {
             let time_stamp = SystemTime::now()
@@ -41,5 +41,21 @@ impl AccInfo for BYBIT<'_> {
                 .json::<RESULT_EXCH_BYBIT<ACC_INFO>>()
                 .await
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::bybit::account::acc_info::*;
+    use crate::bybit::prelude_tests::prelude::*;
+
+    #[tokio::test]
+    async fn acc_info_req_lch_1() {
+        println!("{:#?}", EXCH.acc_info_req().await.unwrap());
+    }
+
+    #[tokio::test]
+    async fn acc_info_a_lch_1() {
+        println!("{:#?}", EXCH.acc_info_a().await.unwrap());
     }
 }

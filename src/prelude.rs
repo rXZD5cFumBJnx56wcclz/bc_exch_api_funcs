@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub use std::error::Error;
 pub use std::time::{Duration, SystemTime, UNIX_EPOCH};
 

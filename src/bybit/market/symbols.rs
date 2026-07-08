@@ -72,3 +72,20 @@ impl Symbols for BYBIT<'_> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::bybit::market::symbols::*;
+
+    use crate::bybit::prelude_tests::prelude::*;
+
+    #[tokio::test]
+    async fn symbols_req_lch_1() {
+        EXCH.symbols_req("", "", "").await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn symbols_a_lch_1() {
+        EXCH.symbols_a("", "", "").await.unwrap();
+    }
+}

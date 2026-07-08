@@ -1,0 +1,15 @@
+#![allow(unused_imports)]
+pub mod prelude {
+    pub use std::sync::LazyLock;
+
+    pub use bc_utils_lg::structs::settings::SETTINGS;
+    pub use bc_utils_lg::structs::settings::settings_from_json;
+    pub use reqwest::Client;
+    pub use tokio;
+
+    pub use crate::bybit::exch_struct::BYBIT;
+
+    pub static S: LazyLock<SETTINGS> =
+        LazyLock::new(|| settings_from_json("settings.json".into()).unwrap());
+    pub static EXCH: LazyLock<BYBIT<'_>> = LazyLock::new(|| BYBIT::new(&*S));
+}

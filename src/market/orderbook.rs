@@ -14,36 +14,40 @@ pub struct ORDERBOOK {
     pub cts: i64,
 }
 
-pub trait Orderbook: Exchange {
-    fn orderbook_req<'a>(
-        &'a self,
+pub trait Orderbook {
+    fn orderbook_req(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         limit: usize,
-    ) -> impl Future<Output = Result<impl ResultWrap<ORDERBOOK>, Error_req>>;
-    fn orderbook<'a>(
-        &'a self,
+    ) -> impl Future<Output = Result<ResultWrap<ORDERBOOK>, Error_req>>;
+    fn orderbook(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         limit: usize,
     ) -> impl Future<Output = Result<ORDERBOOK, Box<dyn std::error::Error>>> {
-        async move { Ok(self.orderbook_req(symbol, limit).await?.res()) }
+        async move { Ok(self.orderbook_req(s, symbol, limit).await?.res()) }
     }
 
-    fn orderbook_a<'a>(
-        &'a self,
+    fn orderbook_a(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         limit: usize,
     ) -> impl Future<Output = Result<ORDERBOOK, Box<dyn Error>>> {
         async move {
             all_or_nothing(
-                async || self.orderbook(symbol, limit).await,
-                usizezero(self.s().exch.timeout_cycle_ms),
+                async || self.orderbook(s, symbol, limit).await,
+                usizezero(s.timeout_cycle_ms),
             )
             .await
         }
     }
 
     fn orderbooks<'a>(
-        &'a self,
+        &self,
+        s: &SETTINGS_EXCH,
         symbols: &'a [String],
         limit: usize,
     ) -> impl Future<Output = MAP<&'a str, Result<ORDERBOOK, Box<dyn std::error::Error>>>> {
@@ -51,7 +55,7 @@ pub trait Orderbook: Exchange {
             join_all(
                 symbols
                     .iter()
-                    .map(|v| async { (v.as_str(), self.orderbook(v.as_str(), limit).await) }),
+                    .map(|v| async { (v.as_str(), self.orderbook(s, v.as_str(), limit).await) }),
             )
             .await
             .into_iter()
@@ -60,14 +64,15 @@ pub trait Orderbook: Exchange {
     }
 
     fn orderbooks_a<'a>(
-        &'a self,
+        &self,
+        s: &SETTINGS_EXCH,
         symbols: &'a [String],
         limit: usize,
     ) -> impl Future<Output = Result<MAP<&'a str, ORDERBOOK>, Box<dyn Error>>> {
         async move {
             join_all(
                 symbols.iter().map(|v| async {
-                    Ok((v.as_str(), self.orderbook_a(v.as_str(), limit).await?))
+                    Ok((v.as_str(), self.orderbook_a(s, v.as_str(), limit).await?))
                 }),
             )
             .await

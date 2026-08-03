@@ -8,7 +8,7 @@ fn wallet_balance_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
 
     c.bench_function("wallet_balance_req_lch_1", |b| {
-        b.to_async(&rtm).iter(|| EXCH.wallet_balance_req("USDT"));
+        b.to_async(&rtm).iter(|| EXCH().wallet_balance_req("USDT"));
     });
 }
 
@@ -16,7 +16,7 @@ fn wallet_balance_a_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
 
     c.bench_function("wallet_balance_a_lch_1", |b| {
-        b.to_async(&rtm).iter(|| EXCH.wallet_balance_a("USDT", 3));
+        b.to_async(&rtm).iter(|| EXCH().wallet_balance_a("USDT", 3));
     });
 }
 

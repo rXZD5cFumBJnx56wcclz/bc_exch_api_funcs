@@ -9,18 +9,20 @@ pub struct OI1 {
     pub timestamp: String,
 }
 
-pub trait OpenInterest: Exchange {
-    fn oi_req<'a>(
-        &'a self,
+pub trait OpenInterest {
+    fn oi_req(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         interval_time: &str,
         start_time: usize,
         end_time: usize,
         limit: usize,
         cursor: &str,
-    ) -> impl Future<Output = Result<impl ResultWrap<Vec<OI1>>, Error_req>>;
-    fn oi<'a>(
-        &'a self,
+    ) -> impl Future<Output = Result<ResultWrap<Vec<OI1>>, Error_req>>;
+    fn oi(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         interval_time: &str,
         start_time: usize,
@@ -30,13 +32,22 @@ pub trait OpenInterest: Exchange {
     ) -> impl Future<Output = Result<Vec<OI1>, Box<dyn std::error::Error>>> {
         async move {
             Ok(self
-                .oi_req(symbol, interval_time, start_time, end_time, limit, cursor)
+                .oi_req(
+                    s,
+                    symbol,
+                    interval_time,
+                    start_time,
+                    end_time,
+                    limit,
+                    cursor,
+                )
                 .await?
                 .res())
         }
     }
-    fn oi_a<'a>(
-        &'a self,
+    fn oi_a(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         interval_time: &str,
         start_time: usize,
@@ -46,8 +57,18 @@ pub trait OpenInterest: Exchange {
     ) -> impl Future<Output = Result<Vec<OI1>, Box<dyn Error>>> {
         async move {
             all_or_nothing(
-                || self.oi(symbol, interval_time, start_time, end_time, limit, cursor),
-                usizezero(self.s().exch.timeout_cycle_ms),
+                || {
+                    self.oi(
+                        s,
+                        symbol,
+                        interval_time,
+                        start_time,
+                        end_time,
+                        limit,
+                        cursor,
+                    )
+                },
+                usizezero(s.timeout_cycle_ms),
             )
             .await
         }

@@ -1,4 +1,4 @@
-use bc_utils_core::hashing::hmac_;
+use crate::hashing::hmac_;
 
 pub fn api_gen(
     key: &'static str,

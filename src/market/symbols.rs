@@ -31,53 +31,40 @@ pub struct SYMBOLS1 {
     pub basis: String,
 }
 
-#[derive(Serialize, Deserialize, std::fmt::Debug)]
-pub struct RESULT_WRAP_SYMBOLS {
-    pub category: String,
-    pub list: Vec<SYMBOLS1>,
-}
-
-impl ResultWrap<Vec<SYMBOLS1>> for RESULT_WRAP_SYMBOLS {
-    fn res(self) -> Vec<SYMBOLS1> {
-        self.list
-    }
-}
-
-pub trait Symbols: Exchange {
-    fn symbols_req<'a, T>(
-        &'a self,
+pub trait Symbols {
+    fn symbols(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         base_coin: &str,
         exp_date: &str,
-    ) -> impl Future<Output = Result<impl ResultWrap<T>, Error_req>>
-    where
-        T: ResultWrap<Vec<SYMBOLS1>>;
-    fn symbols<'a>(
-        &'a self,
+    ) -> impl Future<Output = Result<ResultWrap<Vec<SYMBOLS1>>, ExchangeError>>;
+    fn symbols_a(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         base_coin: &str,
         exp_date: &str,
-    ) -> impl Future<Output = Result<Vec<SYMBOLS1>, Box<dyn std::error::Error>>> {
-        async move {
-            Ok(self
-                .symbols_req::<RESULT_WRAP_SYMBOLS>(symbol, base_coin, exp_date)
-                .await?
-                .res()
-                .res())
-        }
-    }
-    fn symbols_a<'a>(
-        &'a self,
-        symbol: &str,
-        base_coin: &str,
-        exp_date: &str,
-    ) -> impl Future<Output = Result<Vec<SYMBOLS1>, Box<dyn Error>>> {
+    ) -> impl Future<Output = Result<ResultWrap<Vec<SYMBOLS1>>, ExchangeError>> {
         async move {
             all_or_nothing(
-                async || self.symbols(symbol, base_coin, exp_date).await,
-                usizezero(self.s().exch.timeout_cycle_ms),
+                async || Ok(self.symbols(s, symbol, base_coin, exp_date).await?),
+                s,
             )
             .await
+        }
+    }
+    fn symbols_only(
+        &self,
+        s: &SETTINGS_EXCH,
+    ) -> impl Future<Output = Result<ResultWrap<Vec<String>>, ExchangeError>> {
+        async move {
+            let res = self.symbols(s, "", "", "").await?;
+            Ok(ResultWrap {
+                time: res.time,
+                res: res.res.into_iter().map(|v| v.symbol).collect(),
+                info: None,
+            })
         }
     }
 }

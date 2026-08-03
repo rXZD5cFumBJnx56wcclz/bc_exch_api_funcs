@@ -41,26 +41,26 @@ pub struct WALLET_BALANCE {
     pub coin: Vec<WALLET_BALANCE1>,
 }
 
-pub trait WalletBalance: Exchange {
-    fn wallet_balance_req<'a>(
-        &'a self,
-
+pub trait WalletBalance {
+    fn wallet_balance_req(
+        &self,
+        s: &SETTINGS_EXCH,
         coin: &str,
-    ) -> impl Future<Output = Result<impl ResultWrap<Vec<WALLET_BALANCE>>, Error_req>>;
-    fn wallet_balance<'a>(
-        &'a self,
-
+    ) -> impl Future<Output = Result<ResultWrap<Vec<WALLET_BALANCE>>, Error_req>>;
+    fn wallet_balance(
+        &self,
+        s: &SETTINGS_EXCH,
         coin: &str,
     ) -> impl Future<Output = Result<Vec<WALLET_BALANCE>, Box<dyn std::error::Error>>> {
-        async move { Ok(self.wallet_balance_req(coin).await?.res()) }
+        async move { Ok(self.wallet_balance_req(s, coin).await?.res()) }
     }
 
-    fn wallet_balance_a<'a>(
-        &'a self,
-
+    fn wallet_balance_a(
+        &self,
+        s: &SETTINGS_EXCH,
         coin: &str,
         timeout_cycle_ms: usize,
     ) -> impl Future<Output = Result<Vec<WALLET_BALANCE>, Box<dyn Error>>> {
-        async move { all_or_nothing(|| self.wallet_balance(coin), timeout_cycle_ms).await }
+        async move { all_or_nothing(|| self.wallet_balance(s, coin), timeout_cycle_ms).await }
     }
 }

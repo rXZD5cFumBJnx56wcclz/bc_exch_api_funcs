@@ -1,7 +1,9 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use crate::bybit::prelude::*;
+use bc_utils_lg::structs::settings::SETTINGS_EXCH;
+
+use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
 pub struct INSTR_INFO2_LEVERAGE_FILTER {
@@ -65,29 +67,37 @@ pub struct INSTR_INFO {
     pub nextPageCursor: String,
 }
 
-impl ResultWrap<Vec<INSTR_INFO1>> for INSTR_INFO {
+ResultWrap<Vec<INSTR_INFO1>> for INSTR_INFO {
     fn res(self) -> Vec<INSTR_INFO1> {
         self.list
     }
 }
 
-pub trait InstrumentsInfo: Exchange {
-    fn instr_info_req<'a>(
-        &'a self,
+impl GetTime for INSTR_INFO {
+    fn time(&self) -> usize {
+        0
+    }
+}
+
+pub trait InstrumentsInfo {
+    fn instr_info_req(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         status: &str,
         base_coin: &str,
         limit: usize,
         cursor: &str,
-    ) -> impl Future<Output = Result<impl ResultWrap<INSTR_INFO>, Error_req>>;
-    fn instr_info<'a>(
-        &'a self,
+    ) -> impl Future<Output = Result<ResultWrap<INSTR_INFO>, Error_req>>;
+    fn instr_info(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         status: &str,
         base_coin: &str,
     ) -> impl Future<Output = Result<INSTR_INFO1, Box<dyn std::error::Error>>> {
         async move {
-            self.instr_info_req(symbol, status, base_coin, 1, "")
+            self.instr_info_req(s, symbol, status, base_coin, 1, "")
                 .await?
                 .res()
                 .res()
@@ -97,23 +107,25 @@ pub trait InstrumentsInfo: Exchange {
         }
     }
 
-    fn instr_info_a<'a>(
-        &'a self,
+    fn instr_info_a(
+        &self,
+        s: &SETTINGS_EXCH,
         symbol: &str,
         status: &str,
         base_coin: &str,
     ) -> impl Future<Output = Result<INSTR_INFO1, Box<dyn Error>>> {
         async move {
             all_or_nothing(
-                async || self.instr_info(symbol, status, base_coin).await,
-                usizezero(self.s().exch.timeout_cycle_ms),
+                async || self.instr_info(s, symbol, status, base_coin).await,
+                usizezero(s.timeout_cycle_ms),
             )
             .await
         }
     }
 
     fn instrs_info<'a>(
-        &'a self,
+        &self,
+        s: &SETTINGS_EXCH,
         symbols: &'a [String],
         status: &'a str,
         base_coin: &'a str,
@@ -125,7 +137,7 @@ pub trait InstrumentsInfo: Exchange {
             while passed.len() != symbols.len() {
                 let response_ = self
                     .instr_info_req(
-                        "", status, base_coin, // fix this `limit` arg ↓
+                        s, "", status, base_coin, // fix this `limit` arg ↓
                         1000, &cursor,
                     )
                     .await?
@@ -146,15 +158,16 @@ pub trait InstrumentsInfo: Exchange {
     }
 
     fn instrs_info_a<'a>(
-        &'a self,
+        &self,
+        s: &SETTINGS_EXCH,
         symbols: &'a [String],
         status: &'a str,
         base_coin: &'a str,
     ) -> impl Future<Output = Result<MAP<&'a str, INSTR_INFO1>, Box<dyn Error>>> {
         async move {
             all_or_nothing(
-                || self.instrs_info(symbols, status, base_coin),
-                usizezero(self.s().exch.timeout_cycle_ms),
+                || self.instrs_info(s, symbols, status, base_coin),
+                usizezero(s.timeout_cycle_ms),
             )
             .await
         }

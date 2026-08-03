@@ -8,7 +8,7 @@ fn oi_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
     c.bench_function("oi_req_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| EXCH.oi_req("SUIUSDT", "5min", 0, 0, 1, ""));
+            .iter(|| EXCH().oi_req("SUIUSDT", "5min", 0, 0, 1, ""));
     });
 }
 
@@ -16,7 +16,7 @@ fn oi_a_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
     c.bench_function("oi_a_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| EXCH.oi_a("SUIUSDT", "5min", 0, 0, 1, ""));
+            .iter(|| EXCH().oi_a("SUIUSDT", "5min", 0, 0, 1, ""));
     });
 }
 

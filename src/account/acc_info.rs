@@ -15,16 +15,19 @@ pub struct ACC_INFO {
     pub spotHedgingStatus: String,
 }
 
-pub trait AccInfo: Exchange {
-    fn acc_info_req<'a>(
-        &'a self,
-    ) -> impl Future<Output = Result<impl ResultWrap<ACC_INFO>, Error_req>>;
-    fn acc_info<'a>(
-        &'a self,
+pub trait AccInfo {
+    fn acc_info_req(
+        &self,
+        s: &SETTINGS_EXCH,
+    ) -> impl Future<Output = Result<ResultWrap<ACC_INFO>, Error_req>>;
+    fn acc_info(
+        &self,
+        s: &SETTINGS_EXCH,
     ) -> impl Future<Output = Result<ACC_INFO, Box<dyn std::error::Error>>> {
-        async move { Ok(self.acc_info_req().await?.res()) }
+        async move { Ok(self.acc_info_req(s).await?.res()) }
     }
 
+<<<<<<< Updated upstream
     fn acc_info_a<'a>(&'a self) -> impl Future<Output = Result<ACC_INFO, Box<dyn Error>>> {
         async move {
             all_or_nothing(
@@ -33,5 +36,12 @@ pub trait AccInfo: Exchange {
             )
             .await
         }
+=======
+    fn acc_info_a(
+        &self,
+        s: &SETTINGS_EXCH,
+    ) -> impl Future<Output = Result<ACC_INFO, Box<dyn Error>>> {
+        async move { all_or_nothing(|| self.acc_info(s), usizezero(s.timeout_cycle_ms)).await }
+>>>>>>> Stashed changes
     }
 }

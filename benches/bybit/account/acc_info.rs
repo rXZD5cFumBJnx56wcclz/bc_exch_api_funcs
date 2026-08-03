@@ -8,7 +8,7 @@ fn acc_info_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
 
     c.bench_function("acc_info_req_lch_1", |b| {
-        b.to_async(&rtm).iter(|| EXCH.acc_info_req());
+        b.to_async(&rtm).iter(|| EXCH().acc_info_req());
     });
 }
 
@@ -16,7 +16,7 @@ fn acc_info_a_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
 
     c.bench_function("acc_info_a_lch_1", |b| {
-        b.to_async(&rtm).iter(|| EXCH.acc_info_a());
+        b.to_async(&rtm).iter(|| EXCH().acc_info_a());
     });
 }
 

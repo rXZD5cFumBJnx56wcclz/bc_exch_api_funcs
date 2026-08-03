@@ -1,5 +1,10 @@
 pub mod account;
 pub mod bybit;
 pub mod deffunc;
+pub mod error;
+pub mod hashing;
 pub mod main_trait;
 pub mod market;
+pub mod mechanisms;
+pub mod prelude;
+pub mod ws_connect;

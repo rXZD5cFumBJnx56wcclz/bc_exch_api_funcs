@@ -8,21 +8,22 @@ fn instr_info_req_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
     c.bench_function("instr_info_req_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| EXCH.instr_info_req("", "", "", 1, ""));
+            .iter(|| EXCH().instr_info_req("", "", "", 1, ""));
     });
 }
 
 fn instr_info_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
     c.bench_function("instr_info_lch_1", |b| {
-        b.to_async(&rtm).iter(|| EXCH.instr_info("BTCUSDT", "", ""));
+        b.to_async(&rtm)
+            .iter(|| EXCH().instr_info("BTCUSDT", "", ""));
     });
 }
 
 fn instr_info_a_lch_1(c: &mut Criterion) {
     let rtm = Runtime::new().unwrap();
     c.bench_function("instr_info_a_lch_1", |b| {
-        b.to_async(&rtm).iter(|| EXCH.instr_info_a("", "", ""));
+        b.to_async(&rtm).iter(|| EXCH().instr_info_a("", "", ""));
     });
 }
 
@@ -34,7 +35,8 @@ fn instrs_info_lch_1(c: &mut Criterion) {
         "ETHUSDT".to_string(),
     ];
     c.bench_function("instrs_info_lch_1", |b| {
-        b.to_async(&rtm).iter(|| EXCH.instrs_info(symbols, "", ""));
+        b.to_async(&rtm)
+            .iter(|| EXCH().instrs_info(symbols, "", ""));
     });
 }
 
@@ -47,7 +49,7 @@ fn instrs_info_a_lch_1(c: &mut Criterion) {
     ];
     c.bench_function("instrs_info_a_lch_1", |b| {
         b.to_async(&rtm)
-            .iter(|| EXCH.instrs_info_a(symbols, "", ""));
+            .iter(|| EXCH().instrs_info_a(symbols, "", ""));
     });
 }
 

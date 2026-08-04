@@ -3,7 +3,18 @@
 
 use crate::{market::klines::Klines, prelude::*};
 
-// src: 0 time, 1 open_price, 2 high_price, 3 low_price, 4 close_price, 5 volume, 6 turnover, 7 index, 8 mark,
+// src:
+// 0 start_time,
+// 1 open_price,
+// 2 high_price,
+// 3 low_price,
+// 4 close_price,
+// 5 volume,
+// 6 turnover,
+// 7 index_price,
+// 8 mark_price,
+// bid price
+// ask price
 pub trait Src: Klines {
     fn src_a(
         &self,

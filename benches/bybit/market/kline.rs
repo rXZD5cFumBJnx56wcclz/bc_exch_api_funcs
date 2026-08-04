@@ -3,27 +3,8 @@ mod prelude;
 use bc_exch_api_funcs::market::kline::Kline;
 use prelude::*;
 
-pub async fn bench_ws(exch: &mut BYBIT, len_symbols: usize) -> (Vec<Duration>, Vec<Duration>) {
-    dbg!(len_symbols);
-    let cycles = 10;
-    let mut res = Vec::with_capacity(cycles * len_symbols);
-    let mut res_cycles = Vec::with_capacity(cycles);
-    for cycle in 0..cycles {
-        let ins1_cycle = Instant::now();
-        println!("cycle: {cycle}");
-        for _ in 0..len_symbols {
-            let ins1 = Instant::now();
-            exch.ping(&S).await.unwrap();
-            exch.next_kline_a(&S).await.unwrap();
-            res.push(Instant::now() - ins1);
-        }
-        res_cycles.push(Instant::now() - ins1_cycle);
-    }
-    (res_cycles, res)
-}
-
 fn main() {
-    let mut exch = EXCH();
+    let exch = EXCH();
     let symbols = vec![
         "0GUSDT".to_string(),
         "1000000BABYDOGEUSDT".to_string(),
@@ -772,9 +753,22 @@ fn main() {
         "ZROUSDT".to_string(),
         "ZRXUSDT".to_string(),
     ];
+    // let symbols = vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()];
     let rtm = Runtime::new().unwrap();
     rtm.block_on(async { exch.connect_kline(&S, &symbols).await.unwrap() });
-    let (res_cycle, res) = rtm.block_on(async {bench_ws(&mut exch, symbols.len()).await}); 
-    println!("{}", stat_bench(&res_cycle));
-    println!("{}", stat_bench(&res));
+    let stat = rtm
+        .block_on(async {
+            bench_ws(
+                "kline_1",
+                30.,
+                5.,
+                &async || exch.next_kline_a(&S).await,
+                &async || exch.ping(&S).await,
+                &|t| t.time,
+                // &|t| Duration::from_millis(t.info.unwrap().parse::<u64>().unwrap()),
+            )
+            .await
+        })
+        .unwrap();
+    println!("{stat}");
 }

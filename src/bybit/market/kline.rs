@@ -31,11 +31,13 @@ pub struct DATA_KLINE {
     pub timestamp: usize,
 }
 
+#[serde_as]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WRAP_KLINE {
     pub topic: String,
     pub r#type: String,
-    pub ts: usize,
+    #[serde_as(as = "DurationMilliSeconds<u64>")]
+    pub ts: Duration,
     pub data: Vec<DATA_KLINE>,
 }
 
@@ -52,18 +54,15 @@ pub fn to_kline(mut msg: WRAP_KLINE) -> ResultWrap<Vec<f64>> {
             data.close,
             data.volume,
             data.turnover,
-            data.turnover,
-            // default index, mark
-            data.close,
-            data.close,
         ],
-        info: Some(msg.topic.clone()),
+        topic: Some(msg.topic.clone()),
+        info: Some(data.timestamp.to_string()),
     }
 }
 
 impl Kline for BYBIT {
     fn connect_kline(
-        &mut self,
+        &self,
         s: &SETTINGS_EXCH,
         symbols: &[String],
     ) -> impl Future<Output = Result<Response<Option<Vec<u8>>>, Box<dyn Error>>> {
@@ -78,24 +77,27 @@ impl Kline for BYBIT {
                     }}"#,
                     symbols
                         .iter()
-                        .map(|v| format!("kline.{}.{}", s.timeframe / 60000, v,))
+                        .map(|v| format!("kline.{}.{}", s.timeframe.as_secs(), v,))
                         .collect::<Vec<String>>()
                 )
                 .into(),
             ))
             .await?;
-            let (sink, stream_) = ws.split();
-            self.sink = Some(sink);
-            self.stream_ = Some(stream_);
+            self.wws_connected.lock().await.insert("kline".to_string(), ws.split());
             Ok(resp)
         }
     }
-    fn next_kline_req(
-        &mut self,
-    ) -> impl Future<Output = Option<Result<Message, tungstenite::Error>>> {
-        async move { self.stream_.as_mut().unwrap().next().await }
+    fn next_kline_req(&self) -> impl Future<Output = Option<Result<Message, tungstenite::Error>>> {
+        async move {
+            self.wws_connected.lock().await
+                .get_mut("kline")
+                .unwrap()
+                .1
+                .next()
+                .await
+        }
     }
-    fn next_kline(&mut self) -> impl Future<Output = Result<ResultWrap<Vec<f64>>, ExchangeError>> {
+    fn next_kline(&self) -> impl Future<Output = Result<ResultWrap<Vec<f64>>, ExchangeError>> {
         async move {
             match self.next_kline_req().await {
                 Some(connected) => match connected {
@@ -106,7 +108,7 @@ impl Kline for BYBIT {
                             BybitMessagePub::Data(data) => Ok(to_kline(data)),
                             BybitMessagePub::OpResponsePub(op) => match op.op.as_str() {
                                 "ping" => {
-                                    self.pong().await.map_err(|e| ExchangeError::WebSocket(e))?;
+                                    self.pong().await?;
                                     Err(ExchangeError::NotFindData)
                                 }
                                 _ => Err(ExchangeError::NotFindData),
@@ -121,23 +123,10 @@ impl Kline for BYBIT {
     }
 
     fn next_kline_a(
-        &mut self,
+        &self,
         s: &SETTINGS_EXCH,
     ) -> impl Future<Output = Result<ResultWrap<Vec<f64>>, ExchangeError>> {
-        async move {
-            let instant = Instant::now();
-            loop {
-                if instant.duration_since(Instant::now()).as_millis() as usize > s.timeout_cycle_ms
-                {
-                    return Err(ExchangeError::Timeout);
-                }
-                if let Ok(res) = self.next_kline().await {
-                    return Ok(res);
-                } else {
-                    dbg!("err");
-                }
-            }
-        }
+        async move { all_or_nothing(async move || self.next_kline().await, s).await }
     }
 }
 
@@ -148,22 +137,27 @@ mod tests {
 
     #[tokio::test]
     async fn connect_kline_res_1() {
-        assert_eq_pr!(EXCH()
-            .connect_kline(
-                &S,
-                &[
-                    "SUIUSDT".to_string(),
-                    "ETHUSDT".to_string(),
-                    "ATOMUSDT".to_string(),
-                ],
-            )
-            .await
-            .unwrap().status().as_str(), "101");
+        assert_eq_pr!(
+            EXCH()
+                .connect_kline(
+                    &S,
+                    &[
+                        "SUIUSDT".to_string(),
+                        "ETHUSDT".to_string(),
+                        "ATOMUSDT".to_string(),
+                    ],
+                )
+                .await
+                .unwrap()
+                .status()
+                .as_str(),
+            "101"
+        );
     }
 
     #[tokio::test]
     async fn next_kline_res_1() {
-        let mut exch = EXCH();
+        let exch = EXCH();
         exch.connect_kline(
             &S,
             &[

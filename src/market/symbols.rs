@@ -64,6 +64,7 @@ pub trait Symbols {
                 time: res.time,
                 res: res.res.into_iter().map(|v| v.symbol).collect(),
                 info: None,
+                topic: None,
             })
         }
     }

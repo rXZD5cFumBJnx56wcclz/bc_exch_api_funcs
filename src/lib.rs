@@ -1,6 +1,6 @@
 pub mod account;
+pub mod benches;
 pub mod bybit;
-pub mod deffunc;
 pub mod error;
 pub mod hashing;
 pub mod main_trait;

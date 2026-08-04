@@ -3,10 +3,10 @@
 pub mod prelude {
     pub use std::sync::LazyLock;
 
-    pub use pretty_assertions::{assert_eq as assert_eq_pr};
     pub use bc_utils_lg::structs::settings::SETTINGS;
     pub use bc_utils_lg::structs::settings::SETTINGS_EXCH;
     pub use bc_utils_lg::structs::settings::from_json;
+    pub use pretty_assertions::assert_eq as assert_eq_pr;
     pub use reqwest::Client;
     pub use tokio;
 

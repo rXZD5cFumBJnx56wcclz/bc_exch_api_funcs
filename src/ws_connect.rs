@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use std::sync::Arc;
 
+use futures::stream::{SplitSink, SplitStream};
 use rustls_native_certs;
 use tokio::net::TcpStream;
 use tokio_rustls::{
@@ -9,7 +10,11 @@ use tokio_rustls::{
     client::TlsStream,
     rustls::{ClientConfig, RootCertStore, pki_types::ServerName},
 };
-use tokio_tungstenite::{WebSocketStream, client_async};
+use tokio_tungstenite::{WebSocketStream, client_async, tungstenite::Message};
+
+pub type Wws = WebSocketStream<TlsStream<TcpStream>>;
+pub type WwsSink = SplitSink<Wws, Message>;
+pub type WwsStream = SplitStream<Wws>;
 
 pub async fn connect_wws(
     addr: &str,

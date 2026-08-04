@@ -39,7 +39,7 @@ impl Klines for BYBIT {
                         &end={end}",
                     s.url,
                     s.category,
-                    s.timeframe / 60_000,
+                    s.timeframe.as_secs() / 60,
                 ))
                 .send()
                 .await
@@ -53,6 +53,7 @@ impl Klines for BYBIT {
                 time: req.time,
                 res: klines,
                 info: Some(symbol.to_string()),
+                topic: None,
             })
         }
     }

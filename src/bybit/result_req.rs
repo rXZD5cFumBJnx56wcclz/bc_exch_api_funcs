@@ -1,14 +1,19 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+use std::time::Duration;
+
 use serde::{Deserialize, Serialize};
+use serde_with::{DurationMilliSeconds, serde_as};
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde_as]
 pub struct RESULT_EXCH_BYBIT<T> {
     pub retCode: i32,
     pub retMsg: String,
     pub result: T,
-    pub time: usize,
+    #[serde_as(as = "DurationMilliSeconds<u64>")]
+    pub time: Duration,
 }
 
 #[derive(Deserialize, Debug)]

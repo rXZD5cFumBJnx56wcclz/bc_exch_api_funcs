@@ -42,6 +42,7 @@ impl Symbols for BYBIT {
                 time: req.time,
                 res: req.result.list,
                 info: None,
+                topic: None,
             })
         }
     }
@@ -65,6 +66,6 @@ mod tests {
 
     #[tokio::test]
     async fn symbols_only_lch_1() {
-        EXCH().symbols_only(&S,).await.unwrap();
+        EXCH().symbols_only(&S).await.unwrap();
     }
 }

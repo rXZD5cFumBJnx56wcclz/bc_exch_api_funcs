@@ -7,4 +7,7 @@ pub mod main_trait;
 pub mod market;
 pub mod mechanisms;
 pub mod prelude;
-pub mod ws_connect;
+pub mod prelude_tests;
+pub mod rest;
+pub mod utils;
+pub mod wws;

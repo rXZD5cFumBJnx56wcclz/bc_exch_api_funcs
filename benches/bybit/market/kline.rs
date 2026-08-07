@@ -1,10 +1,13 @@
 #[path = "../prelude.rs"]
 mod prelude;
-use bc_exch_api_funcs::market::kline::Kline;
+use bc_exch_api_funcs::bybit::market::kline_wws::Kline;
+use bc_exch_api_funcs::bybit::prelude::*;
+use bc_exch_api_funcs::market::kline::Kline as KlineTrait;
 use prelude::*;
 
-fn main() {
-    let exch = EXCH();
+#[tokio::main]
+async fn main() {
+    // let exch = EXCH();
     let symbols = vec![
         "0GUSDT".to_string(),
         "1000000BABYDOGEUSDT".to_string(),
@@ -754,21 +757,28 @@ fn main() {
         "ZRXUSDT".to_string(),
     ];
     // let symbols = vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()];
-    let rtm = Runtime::new().unwrap();
-    rtm.block_on(async { exch.connect_kline(&S, &symbols).await.unwrap() });
-    let stat = rtm
-        .block_on(async {
-            bench_ws(
-                "kline_1",
-                30.,
-                5.,
-                &async || exch.next_kline_a(&S).await,
-                &async || exch.ping(&S).await,
-                &|t| t.time,
-                // &|t| Duration::from_millis(t.info.unwrap().parse::<u64>().unwrap()),
-            )
-            .await
-        })
-        .unwrap();
-    println!("{stat}");
+    let symbols_splitted_ = symbols_splitted(&symbols, 1);
+    let (mut kline, resp) = Kline::new(symbols_splitted_, &S).await.unwrap();
+    kline.conn.lock().await.ping().await.unwrap();
+    let func = || kline.run();
+    let cycles = cycle_identifier(15., 10., &func).await.unwrap();
+    dbg!(cycles);
+    kline.conn.lock().await.ping().await.unwrap();
+    dbg!("here again");
+    let connections = connections_numbers(symbols.len() as f64, cycles, 1., &func)
+        .await
+        .unwrap() * 2;
+    // let connections = 1;
+    dbg!("here again2");
+    kline.conn.lock().await.ping().await.unwrap();
+    dbg!(connections,);
+    kline = Kline::new(symbols_splitted(&symbols, connections), &S)
+        .await
+        .unwrap()
+        .0;
+    kline.conn.lock().await.ping().await.unwrap();
+    let func = || kline.run();
+    let bench = bench_ws(cycles, &func, &|v| v.time).await.unwrap();
+    println!("{}", stat_bench(&bench["send"]));
+    println!("{}", stat_bench(&bench["send_server_time"]));
 }

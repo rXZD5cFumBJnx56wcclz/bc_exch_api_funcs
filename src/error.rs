@@ -2,6 +2,8 @@ use std::{fmt, io};
 
 use reqwest::Error;
 
+//err confirm
+
 #[derive(Debug)]
 pub enum ExchangeError {
     WebSocket(tokio_tungstenite::tungstenite::Error),
@@ -11,6 +13,8 @@ pub enum ExchangeError {
     Timeout,
     Closed,
     NotFindData,
+    NotConnected,
+    Disconnected,
 }
 
 impl fmt::Display for ExchangeError {
@@ -23,6 +27,8 @@ impl fmt::Display for ExchangeError {
             Self::Timeout => write!(f, "Timeout"),
             Self::Closed => write!(f, "Connection closed"),
             Self::NotFindData => write!(f, "Not find data"),
+            Self::NotConnected => write!(f, "Not connected"),
+            Self::Disconnected => write!(f, "Disconnected"),
         }
     }
 }

@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{collections::HashMap, fmt::Display};
 
 use crate::prelude::*;
 
@@ -34,10 +34,14 @@ pub struct BenchInfo {
 }
 
 impl BenchInfo {
-    pub fn new(bench_id: String, iter_cycles: usize, stats: MAP<String, BenchStatistics>) -> Self {
+    pub fn new(bench_id: String, benches: MAP<String, Vec<Duration>>) -> Self {
+        let stats = benches
+            .into_iter()
+            .map(|v| (v.0, stat_bench(&v.1)))
+            .collect::<MAP<_, _>>();
         Self {
             bench_id,
-            iter_cycles,
+            iter_cycles: stats.values().next().unwrap().res.len(),
             stats,
         }
     }
@@ -51,7 +55,7 @@ impl Display for BenchInfo {
             self.bench_id, self.iter_cycles,
         )?;
         for (k, stat) in &self.stats {
-            write!(f, "{k}: {stat}\n")?;
+            write!(f, "{k}: \n{stat}\n")?;
         }
         Ok(())
     }

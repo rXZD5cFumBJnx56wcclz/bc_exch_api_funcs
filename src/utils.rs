@@ -11,7 +11,13 @@ mod test {
 
     #[test]
     fn symbols_splitted_res_1() {
-        let bind = &["ETHUSDT".to_string(),"ETHUSDT".to_string(),"ETHUSDT".to_string(),"ETHUSDT".to_string(),"ETHUSDT".to_string(),];
+        let bind = &[
+            "ETHUSDT".to_string(),
+            "ETHUSDT".to_string(),
+            "ETHUSDT".to_string(),
+            "ETHUSDT".to_string(),
+            "ETHUSDT".to_string(),
+        ];
         let symbols = symbols_splitted(bind, 2);
         dbg!(&symbols);
         assert_eq_pr!(symbols.len(), 2);

@@ -23,10 +23,10 @@ pub async fn connect_wws(
         .await
         .map_err(|_| ExchangeError::NotConnected)?;
     tcp.set_nodelay(true)
-        .map_err(|e| ExchangeError::NotConnected)?;
+        .map_err(|_e| ExchangeError::NotConnected)?;
     let mut roots = RootCertStore::empty();
     for cert in rustls_native_certs::load_native_certs().certs {
-        roots.add(cert).map_err(|e| ExchangeError::NotConnected)?;
+        roots.add(cert).map_err(|_e| ExchangeError::NotConnected)?;
     }
     let config = ClientConfig::builder()
         .with_root_certificates(roots)
@@ -34,11 +34,11 @@ pub async fn connect_wws(
 
     let connector = TlsConnector::from(Arc::new(config));
     let server_name =
-        ServerName::try_from(addr.to_string()).map_err(|e| ExchangeError::NotConnected)?;
+        ServerName::try_from(addr.to_string()).map_err(|_e| ExchangeError::NotConnected)?;
     let tls = connector
         .connect(server_name, tcp)
         .await
-        .map_err(|e| ExchangeError::NotConnected)?;
+        .map_err(|_e| ExchangeError::NotConnected)?;
     Ok(client_async(url, tls)
         .await
         .map_err(|e| ExchangeError::WebSocket(e))?)
@@ -55,7 +55,7 @@ impl Connection {
         async move {
             let (mut ws, resp) = connect_wws(&s.wws_host, url)
                 .await
-                .map_err(|e| ExchangeError::NotConnected)?;
+                .map_err(|_e| ExchangeError::NotConnected)?;
             ws.send(msg)
                 .await
                 .map_err(|e| ExchangeError::WebSocket(e))?;

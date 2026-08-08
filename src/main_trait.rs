@@ -1,6 +1,5 @@
 use std::{fmt::Debug, time::Duration};
 
-use bc_utils_lg::structs::settings::SETTINGS_EXCH;
 
 #[derive(Debug)]
 pub struct ResultWrap<T> {

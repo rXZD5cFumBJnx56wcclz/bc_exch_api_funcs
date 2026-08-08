@@ -8,7 +8,7 @@ use prelude::*;
 
 #[tokio::main]
 async fn main() {
-    let (kline, resp) = Kline::new(&Symbols::new(&S).run(&CL, &S).await.unwrap().res, &S)
+    let (kline, _resp) = Kline::new(&Symbols::new(&S).run(&CL, &S).await.unwrap().res, &S)
         .await
         .unwrap();
     println!(

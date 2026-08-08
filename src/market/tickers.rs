@@ -15,4 +15,4 @@ pub trait TickersTrait<T> {
 
 pub trait TickersExch<Res, T: TickersTrait<Res>> {
     fn tickers(&self) -> &T;
-} 
+}

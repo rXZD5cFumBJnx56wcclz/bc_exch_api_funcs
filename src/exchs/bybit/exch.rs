@@ -1,4 +1,11 @@
-use crate::{exchs::bybit::market::{kline_wws::Kline, symbols::Symbols, tickers::{TICKERS1, Tickers}}, market::{kline_wws::KlineWwsExch, symbols::SymbolsExch, tickers::TickersExch}};
+use crate::{
+    exchs::bybit::market::{
+        kline_wws::Kline,
+        symbols::Symbols,
+        tickers::{TICKERS1, Tickers},
+    },
+    market::{kline_wws::KlineWwsExch, symbols::SymbolsExch, tickers::TickersExch},
+};
 
 pub struct Bybit {
     pub kline_wws: Kline,

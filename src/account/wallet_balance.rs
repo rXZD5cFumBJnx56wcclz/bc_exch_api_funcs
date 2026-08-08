@@ -3,64 +3,16 @@
 
 use crate::exchs::bybit::prelude::*;
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct WALLET_BALANCE1 {
-    pub availableToBorrow: String,
-    pub bonus: String,
-    pub accruedInterest: String,
-    pub availableToWithdraw: String,
-    pub totalOrderIM: String,
-    pub equity: String,
-    pub totalPositionMM: String,
-    pub usdValue: String,
-    pub spotHedgingQty: String,
-    pub unrealisedPnl: String,
-    pub collateralSwitch: bool,
-    pub borrowAmount: String,
-    pub totalPositionIM: String,
-    pub walletBalance: String,
-    pub cumRealisedPnl: String,
-    pub locked: String,
-    pub marginCollateral: bool,
-    pub coin: String,
+pub trait WalletBalanceTrait<T> {
+    fn run(
+        &self,
+        cl: &Client,
+        s: &SETTINGS_EXCH,
+        // optional
+        coin: &str,
+    ) -> impl Future<Output = Result<ResultWrap<Vec<T>>, ExchangeError>>;
 }
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct WALLET_BALANCE {
-    pub totalEquity: String,
-    pub accountIMRate: String,
-    pub totalMarginBalance: String,
-    pub totalInitialMargin: String,
-    pub accountType: String,
-    pub totalAvailableBalance: String,
-    pub accountMMRate: String,
-    pub totalPerpUPL: String,
-    pub totalWalletBalance: String,
-    pub accountLTV: String,
-    pub totalMaintenanceMargin: String,
-    pub coin: Vec<WALLET_BALANCE1>,
-}
-
-pub trait WalletBalance {
-    fn wallet_balance_req(
-        &self,
-        s: &SETTINGS_EXCH,
-        coin: &str,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<WALLET_BALANCE>>, Error_req>>;
-    fn wallet_balance(
-        &self,
-        s: &SETTINGS_EXCH,
-        coin: &str,
-    ) -> impl Future<Output = Result<Vec<WALLET_BALANCE>, Box<dyn std::error::Error>>> {
-        async move { Ok(self.wallet_balance_req(s, coin).await?.res()) }
-    }
-
-    fn wallet_balance_a(
-        &self,
-        s: &SETTINGS_EXCH,
-        coin: &str,
-        timeout_cycle_ms: usize,
-    ) -> impl Future<Output = Result<Vec<WALLET_BALANCE>, Box<dyn Error>>> {
-        async move { all_or_nothing(|| self.wallet_balance(s, coin), timeout_cycle_ms).await }
-    }
+pub trait WalletBalanceExch<Res, T: WalletBalanceTrait<Res>> {
+    fn wallet_balance(&self) -> &T;
 }

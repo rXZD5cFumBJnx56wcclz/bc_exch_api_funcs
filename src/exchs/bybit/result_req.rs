@@ -17,6 +17,13 @@ pub struct WRAP_REST<T> {
     pub time: Duration,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WRAP_REST_WITHOUT_TIME<T> {
+    pub retCode: i32,
+    pub retMsg: String,
+    pub result: T,
+}
+
 #[serde_as]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WRAP_WWS<T> {

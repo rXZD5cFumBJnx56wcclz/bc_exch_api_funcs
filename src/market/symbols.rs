@@ -10,4 +10,4 @@ pub trait SymbolsTrait {
 
 pub trait SymbolsExch<T: SymbolsTrait> {
     fn symbols(&self) -> &T;
- }
+}

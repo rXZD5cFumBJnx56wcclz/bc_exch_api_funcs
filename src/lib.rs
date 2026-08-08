@@ -1,13 +1,12 @@
 pub mod account;
 pub mod benches;
-pub mod bybit;
+pub mod connect;
 pub mod error;
+pub mod exchs;
 pub mod hashing;
 pub mod main_trait;
 pub mod market;
 pub mod mechanisms;
 pub mod prelude;
 pub mod prelude_tests;
-pub mod rest;
 pub mod utils;
-pub mod wws;

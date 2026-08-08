@@ -2,7 +2,7 @@
 #![allow(non_camel_case_types)]
 
 pub use crate::account::acc_info::*;
-use crate::bybit::prelude::*;
+use crate::exchs::bybit::prelude::*;
 pub const ACC_INFO: &str = "/v5/account/info";
 
 ResultWrap<ACC_INFO> for RESULT_EXCH_BYBIT<ACC_INFO> {
@@ -43,8 +43,8 @@ impl AccInfo for BYBIT {
 
 #[cfg(test)]
 mod tests {
-    use crate::bybit::account::acc_info::*;
-    use crate::bybit::prelude_tests::prelude::*;
+    use crate::exchs::bybit::account::acc_info::*;
+    use crate::exchs::bybit::prelude_tests::prelude::*;
 
     #[tokio::test]
     async fn acc_info_req_lch_1() {

@@ -12,7 +12,7 @@ pub mod prelude {
 
     pub use crate::prelude::*;
 
-    // pub use crate::bybit::client::BYBIT;
+    // pub use crate::exchs::bybit::client::BYBIT;
 
     pub static S: LazyLock<SETTINGS_EXCH> =
         LazyLock::new(|| from_json("settings.json".into()).unwrap());

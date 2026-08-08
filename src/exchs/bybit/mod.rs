@@ -1,7 +1,5 @@
 pub mod account;
 pub mod api_gen;
-pub mod client;
-pub mod connect;
 pub mod market;
 pub mod prelude;
 pub mod prelude_tests;

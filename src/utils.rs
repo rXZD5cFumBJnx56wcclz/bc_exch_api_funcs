@@ -4,6 +4,10 @@ pub fn symbols_splitted(symbols: &[String], num: usize) -> Vec<&[String]> {
     symbols.chunks(symbols.len().div_ceil(num)).collect()
 }
 
+pub fn new_rest_client(s: &SETTINGS_EXCH) -> Client {
+    Client::builder().timeout(s.timeout_req_ms).build().unwrap()
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -19,7 +23,6 @@ mod test {
             "ETHUSDT".to_string(),
         ];
         let symbols = symbols_splitted(bind, 2);
-        dbg!(&symbols);
         assert_eq_pr!(symbols.len(), 2);
     }
 }

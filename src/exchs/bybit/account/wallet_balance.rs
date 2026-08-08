@@ -2,7 +2,7 @@
 #![allow(non_camel_case_types)]
 
 pub use crate::account::wallet_balance::*;
-use crate::bybit::prelude::*;
+use crate::exchs::bybit::prelude::*;
 pub const WALLET_BALANCE: &str = "/v5/account/wallet-balance";
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -50,8 +50,8 @@ impl WalletBalance for BYBIT {
 
 #[cfg(test)]
 mod tests {
-    use crate::bybit::account::wallet_balance::*;
-    use crate::bybit::prelude_tests::prelude::*;
+    use crate::exchs::bybit::account::wallet_balance::*;
+    use crate::exchs::bybit::prelude_tests::prelude::*;
 
     #[tokio::test]
     async fn wallet_balance_req_lch_1() {

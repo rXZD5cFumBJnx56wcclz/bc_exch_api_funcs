@@ -82,13 +82,16 @@ pub async fn bench_all<T>(
 
 pub async fn bench_full<T>(
     bench_id: String,
-    time_reference_sec: f64, 
-    time_out: f64, 
+    time_reference_sec: f64,
+    time_out: f64,
     func: &impl AsyncFn() -> Result<T, ExchangeError>,
     func_server_time: &impl Fn(T) -> Duration,
     func_ping: &impl AsyncFn() -> Result<(), ExchangeError>,
     s: &SETTINGS_EXCH,
 ) -> Result<BenchInfo, ExchangeError> {
     let cycles = cycle_identifier(time_reference_sec, time_out, func).await?;
-    Ok(BenchInfo::new(bench_id, bench_all(cycles, func, func_server_time, func_ping, s).await?))
+    Ok(BenchInfo::new(
+        bench_id,
+        bench_all(cycles, func, func_server_time, func_ping, s).await?,
+    ))
 }

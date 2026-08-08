@@ -4,15 +4,16 @@
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
+use serde_with::formats::Flexible;
 use serde_with::{DurationMilliSeconds, serde_as};
 
-#[derive(Serialize, Deserialize, Debug)]
 #[serde_as]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct WRAP_REST<T> {
     pub retCode: i32,
     pub retMsg: String,
     pub result: T,
-    #[serde_as(as = "DurationMilliSeconds<u64>")]
+    #[serde_as(as = "DurationMilliSeconds<u64, Flexible>")]
     pub time: Duration,
 }
 

@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 
-use crate::bybit::prelude::*;
+use crate::exchs::bybit::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ACC_INFO {

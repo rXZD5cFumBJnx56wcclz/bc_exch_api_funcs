@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use crate::bybit::prelude::*;
+use crate::exchs::bybit::prelude::*;
 pub use crate::market::instr_info::*;
 
 pub const INSTR_INFO: &str = "/v5/market/instruments-info";
@@ -44,8 +44,8 @@ impl InstrumentsInfo for BYBIT {
 
 #[cfg(test)]
 mod tests {
-    use crate::bybit::market::instr_info::*;
-    use crate::bybit::prelude_tests::prelude::*;
+    use crate::exchs::bybit::market::instr_info::*;
+    use crate::exchs::bybit::prelude_tests::prelude::*;
 
     #[tokio::test]
     async fn instr_info_req_lch_1() {

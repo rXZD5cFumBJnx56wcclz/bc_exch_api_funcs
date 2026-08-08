@@ -35,7 +35,7 @@ mod test {
     #[tokio::test]
     async fn connections_numbers_res_1() {
         assert_eq_pr!(
-            connections_numbers(700., 100, 10., &async || Ok(tokio::time::sleep(
+            connections_numbers(700., 10, 10., &async || Ok(tokio::time::sleep(
                 Duration::from_millis(200)
             )
             .await))

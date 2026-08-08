@@ -1,9 +1,10 @@
 #![allow(non_camel_case_types)]
 
-use crate::{bybit::prelude::*, market::kline::Kline as KlineTrait};
+use crate::exchs::bybit::prelude::*;
+use crate::market::kline_wws::KlineWwsTrait;
 
 pub struct Kline {
-    pub conn: BybitConnection,
+    pub conn: Mutex<Connection>,
     pub retry_or_timeout: RetryOrTimeout,
 }
 
@@ -53,12 +54,14 @@ pub fn to_kline_and_check(
     })
 }
 
-fn next(conn: &Connection) -> impl Future<Output = Result<ResultWrap<Vec<f64>>, ExchangeError>> {
+fn next(
+    conn: &Mutex<Connection>,
+) -> impl Future<Output = Result<ResultWrap<Vec<f64>>, ExchangeError>> {
     Box::pin(async move {
         match conn
-            .0
             .lock()
             .await
+            .0
             .1
             .next()
             .await
@@ -82,7 +85,7 @@ impl Kline {
         s: &SETTINGS_EXCH,
     ) -> impl Future<Output = Result<(Self, Response<Option<Vec<u8>>>), ExchangeError>> {
         async move {
-            let (conn, resp) = BybitConnection::new(
+            let (conn, resp) = new_connection(
                 &format!("{WS_PUBLIC}/{}", s.category),
                 "kline",
                 symbols,
@@ -92,7 +95,7 @@ impl Kline {
             .await?;
             Ok((
                 Self {
-                    conn,
+                    conn: Mutex::new(conn),
                     retry_or_timeout: RetryOrTimeout {
                         timeout: s.timeout_cycle_ms,
                     },
@@ -103,11 +106,11 @@ impl Kline {
     }
 }
 
-impl KlineTrait for Kline {
+impl KlineWwsTrait for Kline {
     fn run(&self) -> impl Future<Output = Result<ResultWrap<Vec<f64>>, ExchangeError>> {
         async move {
             self.retry_or_timeout
-                .run(async || next(&self.conn.0).await)
+                .run(async || next(&self.conn).await)
                 .await
         }
     }
@@ -116,7 +119,7 @@ impl KlineTrait for Kline {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bybit::prelude_tests::prelude::*;
+    use crate::exchs::bybit::prelude_tests::prelude::*;
     static SYMBOLS: LazyLock<Vec<String>> = LazyLock::new(|| {
         vec![
             "BTCUSDT".to_string(),

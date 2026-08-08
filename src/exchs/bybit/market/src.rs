@@ -1,8 +1,8 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-use crate::bybit::market::klines::*;
-use crate::bybit::prelude::*;
+use crate::exchs::bybit::market::klines::*;
+use crate::exchs::bybit::prelude::*;
 
 pub trait Src: Exchange + Kline {
     fn src<'a>(
@@ -81,9 +81,9 @@ impl Src for BYBIT {
 mod tests {
     #![warn(unused_must_use)]
 
-    use crate::bybit::market::src::*;
+    use crate::exchs::bybit::market::src::*;
 
-    use crate::bybit::prelude_tests::prelude::*;
+    use crate::exchs::bybit::prelude_tests::prelude::*;
 
     #[tokio::test]
     async fn src_symbols_a_lch_1() {

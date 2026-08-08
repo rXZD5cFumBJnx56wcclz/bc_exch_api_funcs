@@ -12,3 +12,7 @@ pub trait TickersTrait<T> {
         exp_date: &str,
     ) -> impl Future<Output = Result<ResultWrap<Vec<T>>, ExchangeError>>;
 }
+
+pub trait TickersExch<Res, T: TickersTrait<Res>> {
+    fn tickers(&self) -> &T;
+} 

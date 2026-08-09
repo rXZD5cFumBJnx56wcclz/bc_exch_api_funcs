@@ -1,5 +1,5 @@
 use crate::{
-    account::{acc_info::AccInfoExch, wallet_balance::WalletBalanceExch},
+    account::{acc_info::AccInfoTrait, wallet_balance::WalletBalanceTrait},
     exchs::bybit::{
         account::{
             acc_info::{ACC_INFO, AccInfo},
@@ -14,8 +14,8 @@ use crate::{
         },
     },
     market::{
-        instr_info::InstrumentsInfoExch, kline_wws::KlineWwsExch, klines::KlinesExch,
-        symbols::SymbolsExch, tickers::TickersExch,
+        instr_info::InstrumentsInfoTrait, kline_wws::KlineWwsTrait, klines::KlinesTrait,
+        symbols::SymbolsTrait, tickers::TickersTrait,
     },
 };
 
@@ -27,6 +27,34 @@ pub struct Bybit {
     pub instr_info: InstrInfo,
     pub acc_info: AccInfo,
     pub wallet_balance: WalletBalance,
+}
+
+pub trait InstrumentsInfoExch<Res, T: InstrumentsInfoTrait<Res>> {
+    fn instr_info(&self) -> &T;
+}
+
+pub trait KlineWwsExch<T: KlineWwsTrait> {
+    fn kline_wws(&self) -> &T;
+}
+
+pub trait KlinesExch<T: KlinesTrait> {
+    fn klines(&self) -> &T;
+}
+
+pub trait SymbolsExch<T: SymbolsTrait> {
+    fn symbols(&self) -> &T;
+}
+
+pub trait TickersExch<Res, T: TickersTrait<Res>> {
+    fn tickers(&self) -> &T;
+}
+
+pub trait AccInfoExch<Res, T: AccInfoTrait<Res>> {
+    fn acc_info(&self) -> &T;
+}
+
+pub trait WalletBalanceExch<Res, T: WalletBalanceTrait<Res>> {
+    fn wallet_balance(&self) -> &T;
 }
 
 impl KlineWwsExch<Kline> for Bybit {

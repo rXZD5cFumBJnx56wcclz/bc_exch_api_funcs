@@ -10,7 +10,3 @@ pub trait AccInfoTrait<T> {
         s: &SETTINGS_EXCH,
     ) -> impl Future<Output = Result<ResultWrap<T>, ExchangeError>>;
 }
-
-pub trait AccInfoExch<Res, T: AccInfoTrait<Res>> {
-    fn acc_info(&self) -> &T;
-}

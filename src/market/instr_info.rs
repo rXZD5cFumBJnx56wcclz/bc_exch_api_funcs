@@ -15,7 +15,3 @@ pub trait InstrumentsInfoTrait<T> {
         limit: usize,
     ) -> impl Future<Output = Result<ResultWrap<MAP<String, T>>, ExchangeError>>;
 }
-
-pub trait InstrumentsInfoExch<Res, T: InstrumentsInfoTrait<Res>> {
-    fn instr_info(&self) -> &T;
-}

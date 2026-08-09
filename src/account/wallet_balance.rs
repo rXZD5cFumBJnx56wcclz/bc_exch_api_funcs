@@ -12,7 +12,3 @@ pub trait WalletBalanceTrait<T> {
         coin: &str,
     ) -> impl Future<Output = Result<ResultWrap<Vec<T>>, ExchangeError>>;
 }
-
-pub trait WalletBalanceExch<Res, T: WalletBalanceTrait<Res>> {
-    fn wallet_balance(&self) -> &T;
-}

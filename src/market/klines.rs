@@ -14,3 +14,7 @@ pub trait KlinesTrait {
         end: usize,
     ) -> impl Future<Output = Result<ResultWrap<Vec<Vec<f64>>>, ExchangeError>>;
 }
+
+pub trait KlinesExch<T: KlinesTrait> {
+    fn klines(&self) -> &T;
+}

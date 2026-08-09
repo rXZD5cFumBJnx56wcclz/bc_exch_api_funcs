@@ -1,6 +1,6 @@
 [package]
 name = "bc_exch_api_funcs"
-version = "0.1.8"
+version = "0.2.0"
 edition = "2024"
 
 [dependencies]
@@ -30,42 +30,12 @@ name = "kline_bybit"
 path = "benches/bybit/market/kline.rs"
 harness = false
 
-# [[bench]]
-# name = "klines_bybit"
-# path = "benches/bybit/market/klines.rs"
-# harness = false
+[[bench]]
+name = "tickers_bybit"
+path = "benches/bybit/market/tickers.rs"
+harness = false
 
-# [[bench]]
-# name = "instr_info_bybit"
-# path = "benches/bybit/market/instr_info.rs"
-# harness = false
-
-# [[bench]]
-# name = "symbols_bybit"
-# path = "benches/bybit/market/symbols.rs"
-# harness = false
-
-# [[bench]]
-# name = "orderbook_bybit"
-# path = "benches/bybit/market/orderbook.rs"
-# harness = false
-
-# [[bench]]
-# name = "oi_bybit"
-# path = "benches/bybit/market/oi.rs"
-# harness = false
-
-# [[bench]]
-# name = "src_bybit"
-# path = "benches/bybit/market/src.rs"
-# harness = false
-
-# [[bench]]
-# name = "acc_info_bybit"
-# path = "benches/bybit/account/acc_info.rs"
-# harness = false
-
-# [[bench]]
-# name = "wallet_balance_bybit"
-# path = "benches/bybit/account/wallet_balance.rs"
-# harness = false
+[[bench]]
+name = "wallet_balance_bybit"
+path = "benches/bybit/account/wallet_balance.rs"
+harness = false

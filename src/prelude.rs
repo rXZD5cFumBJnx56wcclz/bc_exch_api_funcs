@@ -28,6 +28,7 @@ pub use crate::connect::*;
 pub use crate::error::ExchangeError;
 pub use crate::hashing::*;
 pub use crate::main_trait::*;
+pub use crate::mechanisms::join_all::*;
 pub use crate::mechanisms::race::*;
 pub use crate::mechanisms::retry_or_timeout::*;
 pub use crate::utils::*;

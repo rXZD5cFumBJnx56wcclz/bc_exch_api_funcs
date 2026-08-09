@@ -1,6 +1,5 @@
 use std::{fmt::Debug, time::Duration};
 
-
 #[derive(Debug)]
 pub struct ResultWrap<T> {
     pub topic: Option<String>,

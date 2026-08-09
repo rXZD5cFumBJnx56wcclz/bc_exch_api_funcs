@@ -13,16 +13,8 @@ async fn main() {
         .unwrap();
     println!(
         "{}",
-        bench_full(
-            "kline_1".to_string(),
-            10.,
-            5.,
-            &|| kline.run(),
-            &|v| v.time,
-            &async || ping(&mut *kline.conn.lock().await).await,
-            &S
-        )
-        .await
-        .unwrap()
+        bench_full("kline_1".to_string(), 10., 5., &|| kline.run(), &|v| v.time,)
+            .await
+            .unwrap()
     );
 }

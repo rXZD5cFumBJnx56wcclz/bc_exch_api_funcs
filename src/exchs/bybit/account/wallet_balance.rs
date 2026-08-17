@@ -56,7 +56,7 @@ fn run(
     cl: &Client,
     s: &SETTINGS_EXCH,
     coin: &str,
-) -> impl Future<Output = Result<ResultWrap<Vec<WALLET_BALANCE>>, ExchangeError>> {
+) -> impl Future<Output = Result<Wrap<Vec<WALLET_BALANCE>>, ExchangeError>> {
     async move {
         let time_stamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -91,7 +91,7 @@ fn run(
             .json::<WRAP_REST<WRAP_WALLET_BALANCE>>()
             .await
             .map_err(|e| ExchangeError::Http(e))?;
-        Ok(ResultWrap {
+        Ok(Wrap {
             topic: None,
             time: res.time,
             res: res.result.list,
@@ -107,7 +107,7 @@ impl WalletBalanceTrait<WALLET_BALANCE> for WalletBalance {
         s: &SETTINGS_EXCH,
         // optional
         coin: &str,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<WALLET_BALANCE>>, ExchangeError>> {
+    ) -> impl Future<Output = Result<Wrap<Vec<WALLET_BALANCE>>, ExchangeError>> {
         self.retry_or_timeout.run(|| run(cl, s, coin))
     }
 }

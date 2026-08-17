@@ -13,5 +13,5 @@ pub trait InstrumentsInfoTrait<T> {
         symbol: &str,
         base_coin: &str,
         limit: usize,
-    ) -> impl Future<Output = Result<ResultWrap<MAP<String, T>>, ExchangeError>>;
+    ) -> impl Future<Output = Result<Wrap<MAP<String, T>>, ExchangeError>>;
 }

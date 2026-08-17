@@ -1,5 +1,4 @@
 use crate::{
-    account::{acc_info::AccInfoTrait, wallet_balance::WalletBalanceTrait},
     exchs::bybit::{
         account::{
             acc_info::{ACC_INFO, AccInfo},
@@ -9,13 +8,14 @@ use crate::{
             instr_info::{INSTR_INFO1, InstrInfo},
             kline_wws::Kline,
             klines::Klines,
+            klines_symbols::KlinesSymbols,
             symbols::Symbols,
             tickers::{TICKERS1, Tickers},
         },
     },
-    market::{
-        instr_info::InstrumentsInfoTrait, kline_wws::KlineWwsTrait, klines::KlinesTrait,
-        symbols::SymbolsTrait, tickers::TickersTrait,
+    main_trait::{
+        AccInfoExch, InstrumentsInfoExch, KlineWwsExch, KlinesExch, KlinesSymbolsExch, SymbolsExch,
+        TickersExch, WalletBalanceExch,
     },
 };
 
@@ -27,74 +27,59 @@ pub struct Bybit {
     pub instr_info: InstrInfo,
     pub acc_info: AccInfo,
     pub wallet_balance: WalletBalance,
+    pub klines_symbols: KlinesSymbols,
 }
 
-pub trait InstrumentsInfoExch<Res, T: InstrumentsInfoTrait<Res>> {
-    fn instr_info(&self) -> &T;
+impl KlinesSymbolsExch for Bybit {
+    fn klines_symbols(&self) -> &impl crate::market::klines_symbols::KlinesSymbolsTrait {
+        &self.klines_symbols
+    }
 }
 
-pub trait KlineWwsExch<T: KlineWwsTrait> {
-    fn kline_wws(&self) -> &T;
-}
-
-pub trait KlinesExch<T: KlinesTrait> {
-    fn klines(&self) -> &T;
-}
-
-pub trait SymbolsExch<T: SymbolsTrait> {
-    fn symbols(&self) -> &T;
-}
-
-pub trait TickersExch<Res, T: TickersTrait<Res>> {
-    fn tickers(&self) -> &T;
-}
-
-pub trait AccInfoExch<Res, T: AccInfoTrait<Res>> {
-    fn acc_info(&self) -> &T;
-}
-
-pub trait WalletBalanceExch<Res, T: WalletBalanceTrait<Res>> {
-    fn wallet_balance(&self) -> &T;
-}
-
-impl KlineWwsExch<Kline> for Bybit {
-    fn kline_wws(&self) -> &Kline {
+impl KlineWwsExch for Bybit {
+    fn kline_wws(&self) -> &impl crate::market::kline_wws::KlineWwsTrait {
         &self.kline_wws
     }
 }
 
-impl TickersExch<TICKERS1, Tickers> for Bybit {
-    fn tickers(&self) -> &Tickers {
+impl TickersExch for Bybit {
+    type TickersData = TICKERS1;
+    fn tickers(&self) -> &impl crate::market::tickers::TickersTrait<TICKERS1> {
         &self.tickers
     }
 }
 
-impl SymbolsExch<Symbols> for Bybit {
-    fn symbols(&self) -> &Symbols {
+impl SymbolsExch for Bybit {
+    fn symbols(&self) -> &impl crate::market::symbols::SymbolsTrait {
         &self.symbols
     }
 }
 
-impl KlinesExch<Klines> for Bybit {
-    fn klines(&self) -> &Klines {
+impl KlinesExch for Bybit {
+    fn klines(&self) -> &impl super::market::klines::KlinesTrait {
         &self.klines
     }
 }
 
-impl InstrumentsInfoExch<INSTR_INFO1, InstrInfo> for Bybit {
-    fn instr_info(&self) -> &InstrInfo {
+impl InstrumentsInfoExch for Bybit {
+    type InstrInfoData = INSTR_INFO1;
+    fn instr_info(&self) -> &impl super::market::instr_info::InstrumentsInfoTrait<INSTR_INFO1> {
         &self.instr_info
     }
 }
 
-impl AccInfoExch<ACC_INFO, AccInfo> for Bybit {
-    fn acc_info(&self) -> &AccInfo {
+impl AccInfoExch for Bybit {
+    type AccInfoData = ACC_INFO;
+    fn acc_info(&self) -> &impl super::account::acc_info::AccInfoTrait<ACC_INFO> {
         &self.acc_info
     }
 }
 
-impl WalletBalanceExch<WALLET_BALANCE, WalletBalance> for Bybit {
-    fn wallet_balance(&self) -> &WalletBalance {
+impl WalletBalanceExch for Bybit {
+    type WalletBalanceData = WALLET_BALANCE;
+    fn wallet_balance(
+        &self,
+    ) -> &impl super::account::wallet_balance::WalletBalanceTrait<WALLET_BALANCE> {
         &self.wallet_balance
     }
 }

@@ -38,7 +38,7 @@ fn run(
     limit: usize,
     start: usize,
     end: usize,
-) -> impl Future<Output = Result<ResultWrap<Vec<Vec<f64>>>, ExchangeError>> {
+) -> impl Future<Output = Result<Wrap<Vec<Vec<f64>>>, ExchangeError>> {
     async move {
         let req = cl
             .get(format!(
@@ -61,7 +61,7 @@ fn run(
             .map_err(|e| ExchangeError::Http(e))?;
         let mut klines = req.result.list;
         klines.reverse();
-        Ok(ResultWrap {
+        Ok(Wrap {
             time: req.time,
             res: klines,
             info: Some(symbol.to_string()),
@@ -79,7 +79,7 @@ impl KlinesTrait for Klines {
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<Vec<f64>>>, ExchangeError>> {
+    ) -> impl Future<Output = Result<Wrap<Vec<Vec<f64>>>, ExchangeError>> {
         async move {
             self.retry_or_timeout
                 .run(|| run(cl, s, symbol, limit, start, end))

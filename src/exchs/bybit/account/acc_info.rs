@@ -24,7 +24,7 @@ pub struct ACC_INFO {
 fn run(
     cl: &Client,
     s: &SETTINGS_EXCH,
-) -> impl Future<Output = Result<ResultWrap<ACC_INFO>, ExchangeError>> {
+) -> impl Future<Output = Result<Wrap<ACC_INFO>, ExchangeError>> {
     async move {
         let time_stamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -59,7 +59,7 @@ fn run(
             .json::<WRAP_REST_WITHOUT_TIME<ACC_INFO>>()
             .await
             .map_err(|e| ExchangeError::Http(e))?;
-        Ok(ResultWrap {
+        Ok(Wrap {
             topic: None,
             time,
             res: res.result,
@@ -73,7 +73,7 @@ impl AccInfoTrait<ACC_INFO> for AccInfo {
         &self,
         cl: &Client,
         s: &SETTINGS_EXCH,
-    ) -> impl Future<Output = Result<ResultWrap<ACC_INFO>, ExchangeError>> {
+    ) -> impl Future<Output = Result<Wrap<ACC_INFO>, ExchangeError>> {
         self.retry_or_timeout.run(|| run(cl, s))
     }
 }

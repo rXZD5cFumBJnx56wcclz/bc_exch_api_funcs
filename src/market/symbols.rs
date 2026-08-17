@@ -5,5 +5,5 @@ pub trait SymbolsTrait {
         &self,
         cl: &Client,
         s: &SETTINGS_EXCH,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<String>>, ExchangeError>>;
+    ) -> impl Future<Output = Result<Wrap<Vec<String>>, ExchangeError>>;
 }

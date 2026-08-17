@@ -14,7 +14,7 @@ async fn main() {
     println!(
         "{}",
         bench_full(
-            "tickers_1".to_string(),
+            "wallet_balance_1".to_string(),
             10.,
             5.,
             &|| wallet_balance.run(&CL, &S, "USDT"),

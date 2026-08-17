@@ -55,7 +55,7 @@ impl Src for BYBIT {
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<Vec<f64>>>, ExchangeError>> {
+    ) -> impl Future<Output = Result<Wrap<Vec<Vec<f64>>>, ExchangeError>> {
         async move {
             let mut res = join_all([self.klines_a(s, symbol, limit, start, end)]).await;
             res.remove(0)
@@ -69,7 +69,7 @@ impl Src for BYBIT {
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<MAP<String, ResultWrap<Vec<Vec<f64>>>>, ExchangeError>> {
+    ) -> impl Future<Output = Result<MAP<String, Wrap<Vec<Vec<f64>>>>, ExchangeError>> {
         async move {
             let mut res = join_all([self.klines_symbols_a(s, symbols, limit, start, end)]).await;
             res.remove(0)

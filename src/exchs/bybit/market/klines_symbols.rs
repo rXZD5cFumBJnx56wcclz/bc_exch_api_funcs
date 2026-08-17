@@ -17,7 +17,7 @@ impl KlinesSymbolsTrait for KlinesSymbols {
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<ResultWrap<MAP<String, Vec<Vec<f64>>>>, ExchangeError>> {
+    ) -> impl Future<Output = Result<Wrap<MAP<String, Vec<Vec<f64>>>>, ExchangeError>> {
         async move {
             let res = self
                 .join_all
@@ -28,7 +28,7 @@ impl KlinesSymbolsTrait for KlinesSymbols {
                     )
                 }))
                 .await;
-            Ok(ResultWrap {
+            Ok(Wrap {
                 topic: None,
                 time: res
                     .values()

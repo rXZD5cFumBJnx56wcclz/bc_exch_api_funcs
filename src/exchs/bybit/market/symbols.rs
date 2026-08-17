@@ -20,10 +20,10 @@ impl SymbolsTrait for Symbols {
         &self,
         cl: &Client,
         s: &SETTINGS_EXCH,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<String>>, ExchangeError>> {
+    ) -> impl Future<Output = Result<Wrap<Vec<String>>, ExchangeError>> {
         async move {
             let res = self.tickers.run(cl, s, "", "").await?;
-            Ok(ResultWrap {
+            Ok(Wrap {
                 time: res.time,
                 res: res.res.into_iter().map(|v| v.symbol).collect(),
                 topic: None,

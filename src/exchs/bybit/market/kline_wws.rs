@@ -32,12 +32,12 @@ pub struct DATA_KLINE {
 
 pub fn to_kline_and_check(
     mut msg: WRAP_WWS<DATA_KLINE>,
-) -> Result<ResultWrap<Vec<f64>>, ExchangeError> {
+) -> Result<Wrap<Vec<f64>>, ExchangeError> {
     let data = msg.data.remove(0);
     if data.confirm {
         return Err(ExchangeError::NotFindData);
     }
-    Ok(ResultWrap {
+    Ok(Wrap {
         time: msg.ts,
         res: vec![
             data.start,
@@ -56,7 +56,7 @@ pub fn to_kline_and_check(
 
 fn next(
     conn: &Mutex<Connection>,
-) -> impl Future<Output = Result<ResultWrap<Vec<f64>>, ExchangeError>> {
+) -> impl Future<Output = Result<Wrap<Vec<f64>>, ExchangeError>> {
     Box::pin(async move {
         match conn
             .lock()
@@ -107,7 +107,7 @@ impl Kline {
 }
 
 impl KlineWwsTrait for Kline {
-    fn run(&self) -> impl Future<Output = Result<ResultWrap<Vec<f64>>, ExchangeError>> {
+    fn run(&self) -> impl Future<Output = Result<Wrap<Vec<f64>>, ExchangeError>> {
         async move {
             self.retry_or_timeout
                 .run(async || next(&self.conn).await)

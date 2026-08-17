@@ -58,7 +58,7 @@ fn run(
     s: &SETTINGS_EXCH,
     base_coin: &str,
     exp_date: &str,
-) -> impl Future<Output = Result<ResultWrap<Vec<TICKERS1>>, ExchangeError>> {
+) -> impl Future<Output = Result<Wrap<Vec<TICKERS1>>, ExchangeError>> {
     async move {
         let req = cl
             .get(format!(
@@ -74,7 +74,7 @@ fn run(
             .json::<WRAP_REST<WRAP_TICKERS>>()
             .await
             .map_err(|e| ExchangeError::Http(e))?;
-        Ok(ResultWrap {
+        Ok(Wrap {
             time: req.time,
             res: req.result.list,
             info: None,
@@ -90,7 +90,7 @@ impl TickersTrait<TICKERS1> for Tickers {
         s: &SETTINGS_EXCH,
         base_coin: &str,
         exp_date: &str,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<TICKERS1>>, ExchangeError>> {
+    ) -> impl Future<Output = Result<Wrap<Vec<TICKERS1>>, ExchangeError>> {
         async move {
             self.retry_or_timeout
                 .run(|| run(cl, s, base_coin, exp_date))

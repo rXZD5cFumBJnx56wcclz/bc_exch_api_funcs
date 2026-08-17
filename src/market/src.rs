@@ -23,7 +23,7 @@ pub trait Src: Klines {
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<Vec<f64>>>, ExchangeError>>;
+    ) -> impl Future<Output = Result<Wrap<Vec<Vec<f64>>>, ExchangeError>>;
     fn src_symbols_a<'a>(
         &self,
         s: &SETTINGS_EXCH,
@@ -31,5 +31,5 @@ pub trait Src: Klines {
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<MAP<String, ResultWrap<Vec<Vec<f64>>>>, ExchangeError>>;
+    ) -> impl Future<Output = Result<MAP<String, Wrap<Vec<Vec<f64>>>>, ExchangeError>>;
 }

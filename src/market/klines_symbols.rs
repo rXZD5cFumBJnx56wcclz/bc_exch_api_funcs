@@ -9,5 +9,5 @@ pub trait KlinesSymbolsTrait {
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<ResultWrap<MAP<String, Vec<Vec<f64>>>>, ExchangeError>>;
+    ) -> impl Future<Output = Result<Wrap<MAP<String, Vec<Vec<f64>>>>, ExchangeError>>;
 }

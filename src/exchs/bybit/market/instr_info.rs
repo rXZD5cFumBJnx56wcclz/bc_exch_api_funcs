@@ -79,7 +79,7 @@ async fn run(
     base_coin: &str,
     limit: usize,
     cursor: &str,
-) -> Result<ResultWrap<MAP<String, INSTR_INFO1>>, ExchangeError> {
+) -> Result<Wrap<MAP<String, INSTR_INFO1>>, ExchangeError> {
     let res = cl
         .get(format!(
             "{}{INSTR_INFO}\
@@ -96,7 +96,7 @@ async fn run(
         .json::<WRAP_REST<INSTR_INFO>>()
         .await
         .map_err(|e| ExchangeError::Http(e))?;
-    Ok(ResultWrap {
+    Ok(Wrap {
         topic: None,
         time: res.time,
         res: res
@@ -115,7 +115,7 @@ async fn run_more_1000(
     base_coin: &str,
     limit: usize,
     retry_or_timeout: &RetryOrTimeout,
-) -> Result<ResultWrap<MAP<String, INSTR_INFO1>>, ExchangeError> {
+) -> Result<Wrap<MAP<String, INSTR_INFO1>>, ExchangeError> {
     let mut limit_left = limit;
     let mut cursor = String::new();
     let mut res = MAP::default();
@@ -136,7 +136,7 @@ async fn run_more_1000(
         res.extend(resp.res);
         limit_left -= limit_resp;
     }
-    Ok(ResultWrap {
+    Ok(Wrap {
         topic: None,
         time: time_last,
         res,
@@ -152,7 +152,7 @@ impl InstrumentsInfoTrait<INSTR_INFO1> for InstrInfo {
         symbol: &str,
         base_coin: &str,
         limit: usize,
-    ) -> impl Future<Output = Result<ResultWrap<MAP<String, INSTR_INFO1>>, ExchangeError>> {
+    ) -> impl Future<Output = Result<Wrap<MAP<String, INSTR_INFO1>>, ExchangeError>> {
         async move {
             if !symbol.is_empty() {
                 return self

@@ -1,12 +1,12 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 
-use crate::exchs::bybit::prelude::*;
+use crate::prelude::*;
 
 pub trait AccInfoTrait<T> {
     fn run(
         &self,
         cl: &Client,
         s: &SETTINGS_EXCH,
-    ) -> impl Future<Output = Result<ResultWrap<T>, ExchangeError>>;
+    ) -> impl Future<Output = Result<Wrap<T>, ExchangeError>>;
 }

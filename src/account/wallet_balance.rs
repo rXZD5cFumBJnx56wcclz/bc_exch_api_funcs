@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 
-use crate::exchs::bybit::prelude::*;
+use crate::prelude::*;
 
 pub trait WalletBalanceTrait<T> {
     fn run(
@@ -10,5 +10,5 @@ pub trait WalletBalanceTrait<T> {
         s: &SETTINGS_EXCH,
         // optional
         coin: &str,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<T>>, ExchangeError>>;
+    ) -> impl Future<Output = Result<Wrap<Vec<T>>, ExchangeError>>;
 }

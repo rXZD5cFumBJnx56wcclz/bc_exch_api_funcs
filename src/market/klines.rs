@@ -12,5 +12,5 @@ pub trait KlinesTrait {
         limit: usize,
         start: usize,
         end: usize,
-    ) -> impl Future<Output = Result<ResultWrap<Vec<Vec<f64>>>, ExchangeError>>;
+    ) -> impl Future<Output = Result<Wrap<Vec<Vec<f64>>>, ExchangeError>>;
 }
